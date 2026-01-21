@@ -14,8 +14,10 @@ This document tracks the implementation status and future plans for the Namechea
 | 3     | DNS Email Forwarding  | Done    | list, add, rm                                |
 | 4     | Child Nameservers     | Done    | create, delete, info, update                 |
 | 5     | WhoisGuard            | Done    | list, enable, disable, allot, unallot, renew |
-| 6     | Transfers             | Planned | Future release                               |
-| 7     | SSL Certificates      | Planned | Future release                               |
+| 6     | Shell Completions     | Done    | bash, zsh, fish                              |
+| 7     | Testing Infrastructure| Done    | 379 tests, CI/CD workflows                   |
+| 8     | Transfers             | Planned | Future release                               |
+| 9     | SSL Certificates      | Planned | Future release                               |
 
 ## Command Reference
 
@@ -92,16 +94,37 @@ This document tracks the implementation status and future plans for the Namechea
 | `whoisguard unallot <id>`        | Remove WhoisGuard from domain | Done   |
 | `whoisguard renew <id>`          | Renew WhoisGuard subscription | Done   |
 
+### Shell Completions (`namecheap completions`)
+
+| Command             | Description            | Status |
+| ------------------- | ---------------------- | ------ |
+| `completions bash`  | Bash completion script | Done   |
+| `completions zsh`   | Zsh completion script  | Done   |
+| `completions fish`  | Fish completion script | Done   |
+
+## Testing & Infrastructure
+
+| Component            | Status | Notes                                     |
+| -------------------- | ------ | ----------------------------------------- |
+| Unit Tests           | Done   | 379 tests covering all commands and APIs  |
+| API Mocking          | Done   | XML fixtures for API responses            |
+| Command Tests        | Done   | Integration tests for CLI commands        |
+| TypeScript (Strict)  | Done   | Strict mode with additional checks        |
+| ESLint               | Done   | typescript-eslint with recommended rules  |
+| Prettier             | Done   | Code formatting                           |
+| GitHub Actions CI    | Done   | Test, lint, typecheck, format, build      |
+| GitHub Actions CD    | Done   | Release workflow for tagged versions      |
+
 ## Future Plans
 
-### Phase 6: Domain Transfers
+### Phase 8: Domain Transfers
 
 - `transfers list` - List pending transfers
 - `transfers create <domain>` - Initiate domain transfer
 - `transfers status <domain>` - Check transfer status
 - `transfers update <domain> <action>` - Update transfer (cancel, resubmit)
 
-### Phase 7: SSL Certificates
+### Phase 9: SSL Certificates
 
 - `ssl list` - List SSL certificates
 - `ssl info <id>` - Get certificate details

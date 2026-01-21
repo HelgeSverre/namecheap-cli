@@ -1,7 +1,7 @@
 # Namecheap CLI
 
 [![npm version](https://img.shields.io/npm/v/namecheap-cli.svg)](https://www.npmjs.com/package/namecheap-cli)
-[![CI](https://github.com/helge/namecheap-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/helge/namecheap-cli/actions/workflows/ci.yml)
+[![CI](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, WhoisGuard privacy protection, and more. Built with Bun and TypeScript.
@@ -251,7 +251,7 @@ Before using this CLI, ensure:
 
 ```bash
 # Clone the repository
-git clone https://github.com/helge/namecheap-cli.git
+git clone https://github.com/HelgeSverre/namecheap-cli.git
 cd namecheap-cli
 
 # Install dependencies
@@ -376,9 +376,9 @@ See [CHANGELOG.md](./CHANGELOG.md) for release history and changes.
 
 ## Support
 
-- 📖 [Documentation](https://github.com/helge/namecheap-cli)
-- 🐛 [Issue Tracker](https://github.com/helge/namecheap-cli/issues)
-- 💬 [Discussions](https://github.com/helge/namecheap-cli/discussions)
+- 📖 [Documentation](https://github.com/HelgeSverre/namecheap-cli)
+- 🐛 [Issue Tracker](https://github.com/HelgeSverre/namecheap-cli/issues)
+- 💬 [Discussions](https://github.com/HelgeSverre/namecheap-cli/discussions)
 
 ## Acknowledgments
 
