@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="ERROR" xmlns="http://api.namecheap.com/xml.response">
+  <Errors>
+    <Error Number="2019166">Domain not found in your account</Error>
+  </Errors>
+  <Warnings />
+  <RequestedCommand>namecheap.domains.getInfo</RequestedCommand>
+  <CommandResponse />
+  <Server>PHX01APIEXT05</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.125</ExecutionTime>
+</ApiResponse>

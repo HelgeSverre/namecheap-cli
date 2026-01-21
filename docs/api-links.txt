@@ -1,0 +1,6 @@
+https://www.namecheap.com/support/api/methods/
+https://www.namecheap.com/support/api/global-parameters/
+https://www.namecheap.com/support/api/extended-attributes/
+https://www.namecheap.com/support/api/transfer-statuses/
+https://www.namecheap.com/support/api/error-codes/
+https://www.namecheap.com/support/api/change-log/

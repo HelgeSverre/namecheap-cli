@@ -1,0 +1,66 @@
+# Source files (build output in dist/ is included)
+src/
+*.ts
+!*.d.ts
+tsconfig.json
+
+# Tests
+tests/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+coverage/
+.nyc_output/
+
+# Documentation (keep README.md)
+docs/
+research/
+CLAUDE.md
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# Development files
+.github/
+.vscode/
+.idea/
+*.log
+*.tmp
+links.txt
+
+# Configuration
+.env*
+.eslintrc*
+.eslintcache
+.prettierrc*
+.prettierignore
+eslint.config.js
+.editorconfig
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.travis.yml
+.gitlab-ci.yml
+azure-pipelines.yml
+appveyor.yml
+
+# Package managers
+bun.lockb
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Build artifacts
+*.tsbuildinfo
+.turbo/
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db

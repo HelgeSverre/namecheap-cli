@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <RequestedCommand>namecheap.domains.check</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.check">
+    <DomainCheckResult Domain="available-domain.com" Available="true" IsPremiumName="false" />
+    <DomainCheckResult Domain="example.com" Available="false" IsPremiumName="false" />
+    <DomainCheckResult Domain="premium-domain.io" Available="true" IsPremiumName="true" PremiumRegistrationPrice="1500.00" PremiumRenewalPrice="500.00" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.542</ExecutionTime>
+</ApiResponse>

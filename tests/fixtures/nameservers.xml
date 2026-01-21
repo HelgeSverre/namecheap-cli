@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <RequestedCommand>namecheap.domains.dns.getList</RequestedCommand>
+  <CommandResponse Type="namecheap.domains.dns.getList">
+    <DomainDNSGetListResult Domain="example.com" IsUsingOurDNS="true">
+      <Nameserver>dns1.registrar-servers.com</Nameserver>
+      <Nameserver>dns2.registrar-servers.com</Nameserver>
+    </DomainDNSGetListResult>
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <GMTTimeDifference>--5:00</GMTTimeDifference>
+  <ExecutionTime>0.215</ExecutionTime>
+</ApiResponse>

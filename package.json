@@ -1,0 +1,69 @@
+{
+  "name": "namecheap-cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for managing Namecheap domains, DNS records, nameservers, and WhoisGuard privacy",
+  "module": "src/index.ts",
+  "type": "module",
+  "bin": {
+    "namecheap": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/helge/namecheap-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/helge/namecheap-cli/issues"
+  },
+  "homepage": "https://github.com/helge/namecheap-cli#readme",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage",
+    "check": "bun run typecheck && bun run lint && bun run format:check",
+    "fix": "bun run lint:fix && bun run format"
+  },
+  "keywords": [
+    "namecheap",
+    "cli",
+    "dns",
+    "domain-management",
+    "nameserver"
+  ],
+  "author": "Helge <helge@example.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/bun": "latest",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.2.0",
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.2",
+    "conf": "^15.0.2",
+    "fast-xml-parser": "^5.3.3",
+    "ora": "^9.0.0"
+  }
+}

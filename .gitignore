@@ -1,0 +1,101 @@
+# Dependencies
+node_modules
+bun.lockb
+*.lock
+
+# Build output
+out
+dist
+build
+*.tgz
+
+# Test coverage
+coverage
+*.lcov
+.nyc_output
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Environment variables (SENSITIVE)
+.env
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.local
+*.env
+
+# Configuration files (SENSITIVE - may contain API keys)
+.namecheap-cli
+config.json
+secrets.json
+
+# Caches
+.eslintcache
+.cache
+*.tsbuildinfo
+.turbo
+
+# IDEs and editors
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Operating system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.tmp
+.temp
+
+# Debug files
+*.stackdump
+*.cpuprofile
+*.heapsnapshot
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
