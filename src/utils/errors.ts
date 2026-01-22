@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { isIP } from 'node:net';
 
 // Namecheap API error code mapping
 // Maps error codes to user-friendly messages and suggestions
@@ -121,14 +122,29 @@ export class AuthError extends CliError {
   }
 }
 
+export interface ApiErrorInfo {
+  code: string;
+  message: string;
+}
+
 export class ApiError extends CliError {
-  constructor(
-    message: string,
-    public readonly code?: string,
-    suggestion?: string,
-  ) {
+  public readonly errors: ApiErrorInfo[];
+
+  constructor(message: string, errorsOrCode?: ApiErrorInfo[] | string, suggestion?: string) {
     super(message, 1, suggestion);
     this.name = 'ApiError';
+
+    if (Array.isArray(errorsOrCode)) {
+      this.errors = errorsOrCode;
+    } else if (errorsOrCode) {
+      this.errors = [{ code: errorsOrCode, message }];
+    } else {
+      this.errors = [];
+    }
+  }
+
+  get code(): string | undefined {
+    return this.errors[0]?.code;
   }
 }
 
@@ -140,6 +156,23 @@ export class ValidationError extends CliError {
 }
 
 export function handleError(error: unknown): never {
+  // Handle structured ApiError with error codes
+  if (error instanceof ApiError && error.errors.length > 0) {
+    console.error(chalk.red('API Error:'));
+
+    for (const err of error.errors) {
+      const friendlyError = parseApiErrorCode(err.code);
+      if (friendlyError) {
+        console.error(chalk.red('•'), friendlyError.message);
+        console.error(chalk.dim(`  Suggestion: ${friendlyError.suggestion}`));
+      } else {
+        console.error(chalk.red('•'), `[${err.code}] ${err.message}`);
+      }
+    }
+
+    process.exit(error.exitCode);
+  }
+
   if (error instanceof CliError) {
     console.error(chalk.red('Error:'), error.message);
     if (error.suggestion) {
@@ -159,11 +192,11 @@ export function handleError(error: unknown): never {
       process.exit(1);
     }
 
-    // Parse API errors with error codes
+    // Legacy: Parse API errors with error codes from string messages
+    // TODO: Remove once all code uses structured ApiError
     if (error.message.includes('API Error')) {
       console.error(chalk.red('API Error:'));
 
-      // Try to extract error codes from the message
       const codeMatches = error.message.matchAll(/\[(\d+)\]\s*([^\n]+)/g);
       let hasFormattedErrors = false;
 
@@ -183,7 +216,6 @@ export function handleError(error: unknown): never {
       }
 
       if (!hasFormattedErrors) {
-        // Fallback to original message if no codes found
         console.error(error.message.replace('API Error:\n', ''));
       }
 
@@ -269,15 +301,19 @@ export function validateRecordType(type: string): void {
 }
 
 export function validateIpAddress(ip: string): void {
-  // IPv4
-  const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  // IPv6
-  const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+  if (!ip) {
+    throw new ValidationError(
+      'IP address is required',
+      'Provide a valid IPv4 (e.g., 1.2.3.4) or IPv6 address',
+    );
+  }
 
-  if (!ipv4Regex.test(ip) && !ipv6Regex.test(ip)) {
+  const result = isIP(ip);
+
+  if (result === 0) {
     throw new ValidationError(
       `Invalid IP address: ${ip}`,
-      'Provide a valid IPv4 (e.g., 1.2.3.4) or IPv6 address',
+      'Provide a valid IPv4 (e.g., 1.2.3.4) or IPv6 address (e.g., ::1)',
     );
   }
 }

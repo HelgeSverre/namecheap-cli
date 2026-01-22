@@ -144,7 +144,7 @@ describe('getDnsHosts', () => {
     expect(callUrl).toContain('TLD=com');
   });
 
-  test('handles subdomain format', async () => {
+  test('strips subdomain and uses registrable domain', async () => {
     const xml = loadFixture('dns-hosts.xml');
     const fetchMock = mockFetch(xml);
 
@@ -153,8 +153,21 @@ describe('getDnsHosts', () => {
 
     const calls = fetchMock.mock.calls as unknown as [string][];
     const callUrl = calls[0]?.[0] ?? '';
-    expect(callUrl).toContain('SLD=sub.example');
+    expect(callUrl).toContain('SLD=example');
     expect(callUrl).toContain('TLD=com');
+  });
+
+  test('handles multi-part TLD', async () => {
+    const xml = loadFixture('dns-hosts.xml');
+    const fetchMock = mockFetch(xml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await getDnsHosts(client, 'example.co.uk');
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('SLD=example');
+    expect(callUrl).toContain('TLD=co.uk');
   });
 });
 

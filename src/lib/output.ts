@@ -106,16 +106,15 @@ export function statusBadge(
 // Domain-specific formatters
 export function formatDate(dateStr: string): string {
   if (!dateStr) return chalk.dim('N/A');
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
     return dateStr;
   }
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export function formatExpiry(expiryDate: string): string {

@@ -269,6 +269,27 @@ describe('validateIpAddress', () => {
     }).not.toThrow();
   });
 
+  test('accepts IPv6 shorthand forms', () => {
+    expect(() => {
+      validateIpAddress('::1');
+    }).not.toThrow();
+    expect(() => {
+      validateIpAddress('fe80::1');
+    }).not.toThrow();
+    expect(() => {
+      validateIpAddress('::');
+    }).not.toThrow();
+  });
+
+  test('throws for invalid IPv4 octets', () => {
+    expect(() => {
+      validateIpAddress('999.999.999.999');
+    }).toThrow(ValidationError);
+    expect(() => {
+      validateIpAddress('256.1.1.1');
+    }).toThrow(ValidationError);
+  });
+
   test('throws for invalid IPv4 format', () => {
     expect(() => {
       validateIpAddress('1.2.3');

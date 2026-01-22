@@ -1,6 +1,7 @@
 import { describe, expect, test, mock, beforeEach, afterEach } from 'bun:test';
 import { NamecheapClient, clearClient, getClient } from '../../../src/lib/api/client.js';
 import { setCredentials, clearCredentials } from '../../../src/lib/config.js';
+import { ApiError } from '../../../src/utils/errors.js';
 
 const mockCredentials = {
   apiUser: 'testuser',
@@ -267,7 +268,7 @@ describe('NamecheapClient', () => {
       expect(result).toEqual({ result: 'success' });
     });
 
-    test('throws for failed response with errors', () => {
+    test('throws ApiError for failed response with errors', () => {
       const response = {
         success: false,
         errors: [{ code: '1234', message: 'Error message' }],
@@ -277,20 +278,32 @@ describe('NamecheapClient', () => {
 
       expect(() => {
         NamecheapClient.handleResponse(response);
-      }).toThrow('API Error');
+      }).toThrow(ApiError);
     });
 
-    test('includes error codes in thrown error', () => {
+    test('ApiError includes structured error codes', () => {
       const response = {
         success: false,
-        errors: [{ code: '1234', message: 'Error message' }],
+        errors: [
+          { code: '1234', message: 'First error' },
+          { code: '5678', message: 'Second error' },
+        ],
         warnings: [],
         data: undefined,
       };
 
-      expect(() => {
+      try {
         NamecheapClient.handleResponse(response);
-      }).toThrow('[1234]');
+        expect.unreachable('Should have thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApiError);
+        const apiError = error as ApiError;
+        expect(apiError.errors).toHaveLength(2);
+        expect(apiError.errors[0]?.code).toBe('1234');
+        expect(apiError.errors[0]?.message).toBe('First error');
+        expect(apiError.errors[1]?.code).toBe('5678');
+        expect(apiError.code).toBe('1234'); // First error code
+      }
     });
 
     test('throws when success but no data', () => {

@@ -14,6 +14,7 @@ import {
   renewDomain,
   reactivateDomain,
 } from '../../../src/lib/api/domains.js';
+import { ApiError } from '../../../src/utils/errors.js';
 
 const fixturesDir = join(import.meta.dir, '../../fixtures');
 
@@ -106,13 +107,13 @@ describe('listDomains', () => {
     expect(callUrl).toContain('PageSize=50');
   });
 
-  test('throws on API error', async () => {
+  test('throws ApiError on API error', async () => {
     const xml = loadFixture('error-response.xml');
     mockFetch(xml);
 
     const client = new NamecheapClient(mockCredentials, true);
 
-    await expect(listDomains(client)).rejects.toThrow('API Error');
+    await expect(listDomains(client)).rejects.toThrow(ApiError);
   });
 
   test('throws on HTTP error', async () => {
@@ -280,7 +281,7 @@ describe('NamecheapClient.handleResponse', () => {
     expect(result).toEqual({ test: 'value' });
   });
 
-  test('throws for error response', () => {
+  test('throws ApiError for error response', () => {
     const response = {
       success: false,
       errors: [{ code: '1234', message: 'Test error' }],
@@ -290,13 +291,17 @@ describe('NamecheapClient.handleResponse', () => {
 
     expect(() => {
       NamecheapClient.handleResponse(response);
-    }).toThrow('API Error');
-    expect(() => {
+    }).toThrow(ApiError);
+
+    try {
       NamecheapClient.handleResponse(response);
-    }).toThrow('[1234]');
-    expect(() => {
-      NamecheapClient.handleResponse(response);
-    }).toThrow('Test error');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiError);
+      const apiError = error as ApiError;
+      expect(apiError.errors[0]?.code).toBe('1234');
+      expect(apiError.errors[0]?.message).toBe('Test error');
+      expect(apiError.message).toContain('Test error');
+    }
   });
 
   test('throws for response with no data', () => {

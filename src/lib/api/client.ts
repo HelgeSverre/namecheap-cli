@@ -1,6 +1,7 @@
 import { getCredentials, isSandboxMode } from '../config.js';
 import { parseApiResponse } from './parser.js';
 import type { ApiCommand, ApiCredentials, ApiResponse } from './types.js';
+import { ApiError } from '../../utils/errors.js';
 
 const PRODUCTION_URL = 'https://api.namecheap.com/xml.response';
 const SANDBOX_URL = 'https://api.sandbox.namecheap.com/xml.response';
@@ -89,8 +90,11 @@ export class NamecheapClient {
   // Convenience method for handling API errors
   static handleResponse<T>(response: ApiResponse<T>): T {
     if (!response.success) {
-      const errorMessages = response.errors.map((e) => `[${e.code}] ${e.message}`).join('\n');
-      throw new Error(`API Error:\n${errorMessages}`);
+      const message =
+        response.errors.length > 0
+          ? response.errors.map((e) => e.message).join('; ')
+          : 'API request failed';
+      throw new ApiError(message, response.errors);
     }
 
     if (response.warnings.length > 0) {

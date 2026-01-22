@@ -1,6 +1,7 @@
 import { NamecheapClient } from './client.js';
 import { parseDnsHosts, parseNameservers } from './parser.js';
 import type { DnsRecord, DnsRecordInput, DnsRecordType, NameserverInfo } from './types.js';
+import { parseDomain } from '../../utils/domain.js';
 
 interface RawDnsHost {
   '@_HostId': string | number;
@@ -17,27 +18,6 @@ interface RawNameserverInfo {
   '@_Domain': string;
   '@_IsUsingOurDNS': boolean;
   Nameserver?: string | string[];
-}
-
-function parseDomain(fullDomain: string): { sld: string; tld: string } {
-  const parts = fullDomain.split('.');
-  if (parts.length < 2) {
-    throw new Error(`Invalid domain format: ${fullDomain}`);
-  }
-
-  // Simple case: domain.tld
-  if (parts.length === 2) {
-    return {
-      sld: parts[0]!,
-      tld: parts[1]!,
-    };
-  }
-
-  // Complex case: subdomain.domain.tld - we need the registered domain parts
-  return {
-    sld: parts.slice(0, -1).join('.'),
-    tld: parts[parts.length - 1]!,
-  };
 }
 
 export async function getDnsHosts(client: NamecheapClient, domain: string): Promise<DnsRecord[]> {

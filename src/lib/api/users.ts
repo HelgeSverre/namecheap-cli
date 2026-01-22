@@ -1,4 +1,4 @@
-import type { NamecheapClient } from './client.js';
+import { NamecheapClient } from './client.js';
 import { parseUserBalances, parseUserPricing } from './parser.js';
 
 export interface UserBalances {
@@ -25,13 +25,9 @@ export interface PricingInfo {
 
 export async function getBalances(client: NamecheapClient): Promise<UserBalances> {
   const response = await client.request('namecheap.users.getBalances');
+  const rawData = NamecheapClient.handleResponse(response);
 
-  if (!response.success) {
-    const errorMessages = response.errors.map((e) => `[${e.code}] ${e.message}`).join('\n');
-    throw new Error(`API Error:\n${errorMessages}`);
-  }
-
-  const data = parseUserBalances(response.data) as {
+  const data = parseUserBalances(rawData) as {
     '@_Currency'?: string;
     '@_AvailableBalance'?: number;
     '@_AccountBalance'?: number;
@@ -70,13 +66,9 @@ export async function getPricing(
   }
 
   const response = await client.request('namecheap.users.getPricing', params);
+  const rawData = NamecheapClient.handleResponse(response);
 
-  if (!response.success) {
-    const errorMessages = response.errors.map((e) => `[${e.code}] ${e.message}`).join('\n');
-    throw new Error(`API Error:\n${errorMessages}`);
-  }
-
-  const data = parseUserPricing(response.data);
+  const data = parseUserPricing(rawData);
   return parsePricingResult(data, options.years || 1);
 }
 

@@ -1,29 +1,11 @@
 import { NamecheapClient } from './client.js';
+import { parseDomain } from '../../utils/domain.js';
 
 // Child Nameserver Types
 export interface ChildNameserver {
   nameserver: string;
   ip: string;
   statuses: string[];
-}
-
-function parseDomain(fullDomain: string): { sld: string; tld: string } {
-  const parts = fullDomain.split('.');
-  if (parts.length < 2) {
-    throw new Error(`Invalid domain format: ${fullDomain}`);
-  }
-  // Simple case: domain.tld
-  if (parts.length === 2) {
-    return {
-      sld: parts[0]!,
-      tld: parts[1]!,
-    };
-  }
-  // Complex case: treat as sld.tld
-  return {
-    sld: parts.slice(0, -1).join('.'),
-    tld: parts[parts.length - 1]!,
-  };
 }
 
 export async function createChildNameserver(

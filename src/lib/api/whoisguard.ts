@@ -107,7 +107,7 @@ export async function allotWhoisGuard(
   domainName: string,
 ): Promise<boolean> {
   const response = await client.request('namecheap.whoisguard.allot', {
-    WhoisguardId: whoisguardId,
+    WhoisguardID: whoisguardId,
     DomainName: domainName,
   });
 
@@ -120,7 +120,7 @@ export async function unallotWhoisGuard(
   whoisguardId: string,
 ): Promise<boolean> {
   const response = await client.request('namecheap.whoisguard.unallot', {
-    WhoisguardId: whoisguardId,
+    WhoisguardID: whoisguardId,
   });
 
   NamecheapClient.handleResponse(response);
@@ -143,7 +143,7 @@ export async function renewWhoisGuard(
   promoCode?: string,
 ): Promise<WhoisGuardRenewalResult> {
   const params: Record<string, string | number | boolean> = {
-    WhoisguardId: whoisguardId,
+    WhoisguardID: whoisguardId,
     Years: years,
   };
 
