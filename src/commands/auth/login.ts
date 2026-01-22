@@ -1,40 +1,55 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { NamecheapClient } from '../../lib/api/client.js';
-import { setCredentials, setSandboxMode } from '../../lib/config.js';
+import { getConfigPath, setCredentials, setSandboxMode } from '../../lib/config.js';
 import { info, success } from '../../lib/output.js';
 import { handleError } from '../../utils/errors.js';
-import { promptAuthCredentials, promptConfirm } from '../../utils/prompts.js';
+import { detectPublicIp, promptAuthCredentials } from '../../utils/prompts.js';
 import { withSpinner } from '../../utils/spinner.js';
 
 export const loginCommand = new Command('login')
   .description('Authenticate with Namecheap API')
   .option('--api-user <user>', 'API username')
   .option('--api-key <key>', 'API key')
-  .option('--username <user>', 'Namecheap username (defaults to API user)')
-  .option('--client-ip <ip>', 'Your whitelisted IP address')
-  .option('--sandbox', 'Use sandbox environment for testing')
+  .option('--username <user>', 'Namecheap username (if different from API user)')
+  .option('--client-ip <ip>', 'Your whitelisted IP address (auto-detected if not provided)')
+  .option('--sandbox', 'Use sandbox environment')
+  .option('--no-sandbox', 'Use production environment')
   .action(async (options) => {
     try {
       let credentials;
+      let useSandbox: boolean;
 
-      // Check if all credentials provided via CLI
-      if (options.apiUser && options.apiKey && options.clientIp) {
+      // Check if credentials provided via CLI flags
+      if (options.apiUser && options.apiKey) {
+        // Auto-detect IP if not provided
+        let clientIp = options.clientIp;
+        if (!clientIp) {
+          clientIp = await withSpinner('Detecting public IP...', async () => {
+            const ip = await detectPublicIp();
+            if (!ip) {
+              throw new Error(
+                'Could not detect public IP. Please provide --client-ip manually.',
+              );
+            }
+            return ip;
+          });
+        }
+
         credentials = {
           apiUser: options.apiUser,
           apiKey: options.apiKey,
           userName: options.username || options.apiUser,
-          clientIp: options.clientIp,
+          clientIp,
         };
+        useSandbox = options.sandbox ?? false;
       } else {
         // Interactive prompt
-        credentials = await promptAuthCredentials();
-      }
-
-      // Ask about sandbox mode if not specified
-      let useSandbox = options.sandbox;
-      if (useSandbox === undefined) {
-        useSandbox = await promptConfirm('Use sandbox environment for testing?', false);
+        const result = await promptAuthCredentials({
+          usernameOverride: options.username,
+        });
+        credentials = result.credentials;
+        useSandbox = options.sandbox ?? result.sandbox;
       }
 
       // Validate credentials by making a test API call
@@ -47,7 +62,7 @@ export const loginCommand = new Command('login')
         }
       });
 
-      // Save credentials
+      // Save credentials and settings
       setCredentials(credentials);
       setSandboxMode(useSandbox);
 
@@ -55,7 +70,7 @@ export const loginCommand = new Command('login')
       if (useSandbox) {
         info('Using sandbox environment');
       }
-      console.log(chalk.dim(`\nCredentials saved to config file.`));
+      console.log(chalk.dim(`Config saved to ${getConfigPath()}`));
     } catch (error) {
       handleError(error);
     }

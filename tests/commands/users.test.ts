@@ -1,8 +1,16 @@
 import { describe, expect, test, beforeEach, afterEach, mock, spyOn, type Mock } from 'bun:test';
 import { Command } from 'commander';
+import { addFundsCommand } from '../../src/commands/users/add-funds.js';
 import { balancesCommand } from '../../src/commands/users/balances.js';
+import { changePasswordCommand } from '../../src/commands/users/change-password.js';
+import { createCommand } from '../../src/commands/users/create.js';
+import { fundsStatusCommand } from '../../src/commands/users/funds-status.js';
+import { loginCommand } from '../../src/commands/users/login.js';
 import { pricingCommand } from '../../src/commands/users/pricing.js';
+import { resetPasswordCommand } from '../../src/commands/users/reset-password.js';
+import { updateCommand } from '../../src/commands/users/update.js';
 import * as client from '../../src/lib/api/client.js';
+import * as config from '../../src/lib/config.js';
 import * as usersApi from '../../src/lib/api/users.js';
 import * as spinner from '../../src/utils/spinner.js';
 
@@ -297,5 +305,805 @@ describe('users pricing command', () => {
       expect.anything(),
       expect.objectContaining({ years: 3 }),
     );
+  });
+});
+
+describe('users update command', () => {
+  const requiredOptions = [
+    '--email',
+    'test@example.com',
+    '--first-name',
+    'John',
+    '--last-name',
+    'Doe',
+    '--address1',
+    '123 Main St',
+    '--city',
+    'New York',
+    '--state',
+    'NY',
+    '--zip',
+    '10001',
+    '--country',
+    'US',
+    '--phone',
+    '+1.5551234567',
+  ];
+
+  test('updates user with required options and shows success', async () => {
+    const updateUserSpy = trackSpy(
+      spyOn(usersApi, 'updateUser').mockResolvedValue({
+        success: true,
+        userId: '12345',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(updateCommand);
+    await program.parseAsync(['node', 'test', 'update', ...requiredOptions]);
+
+    expect(updateUserSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        address1: '123 Main St',
+        city: 'New York',
+        stateProvince: 'NY',
+        zip: '10001',
+        country: 'US',
+        phone: '+1.5551234567',
+      }),
+    );
+    expect(logs.some((l) => l.includes('User updated successfully'))).toBe(true);
+    expect(logs.some((l) => l.includes('12345'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(usersApi, 'updateUser').mockResolvedValue({
+        success: true,
+        userId: '12345',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(updateCommand);
+    await program.parseAsync(['node', 'test', 'update', ...requiredOptions, '--json']);
+
+    const jsonOutput = logs.find((l) => l.includes('userId'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.success).toBe(true);
+    expect(parsed.userId).toBe('12345');
+  });
+
+  test('exits with code 1 when missing required options', async () => {
+    const program = new Command();
+    program.addCommand(updateCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'update', '--email', 'test@example.com']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+});
+
+describe('users create command', () => {
+  const requiredOptions = [
+    '--username',
+    'newuser',
+    '--password',
+    'SecurePass123!',
+    '--email',
+    'newuser@example.com',
+    '--first-name',
+    'Jane',
+    '--last-name',
+    'Smith',
+    '--address1',
+    '456 Oak Ave',
+    '--city',
+    'Los Angeles',
+    '--state',
+    'CA',
+    '--zip',
+    '90001',
+    '--country',
+    'US',
+    '--phone',
+    '+1.5559876543',
+  ];
+
+  test('creates user with --accept-terms and shows success', async () => {
+    const createUserSpy = trackSpy(
+      spyOn(usersApi, 'createUser').mockResolvedValue({
+        success: true,
+        userId: '67890',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(createCommand);
+    await program.parseAsync(['node', 'test', 'create', ...requiredOptions, '--accept-terms']);
+
+    expect(createUserSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        username: 'newuser',
+        password: 'SecurePass123!',
+        email: 'newuser@example.com',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        acceptTerms: true,
+      }),
+    );
+    expect(logs.some((l) => l.includes('User created successfully'))).toBe(true);
+    expect(logs.some((l) => l.includes('67890'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(usersApi, 'createUser').mockResolvedValue({
+        success: true,
+        userId: '67890',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(createCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'create',
+      ...requiredOptions,
+      '--accept-terms',
+      '--json',
+    ]);
+
+    const jsonOutput = logs.find((l) => l.includes('userId'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.success).toBe(true);
+    expect(parsed.userId).toBe('67890');
+  });
+
+  test('exits with code 1 without --accept-terms', async () => {
+    const program = new Command();
+    program.addCommand(createCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'create', ...requiredOptions]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+    expect(errors.some((l) => l.includes('accept the terms'))).toBe(true);
+  });
+
+  test('exits with code 1 when missing required options', async () => {
+    const program = new Command();
+    program.addCommand(createCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'create',
+        '--username',
+        'newuser',
+        '--accept-terms',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+});
+
+describe('users add-funds command', () => {
+  test('displays token and redirect URL with required options', async () => {
+    trackSpy(
+      spyOn(config, 'getCredentials').mockReturnValue({
+        apiUser: 'testuser',
+        apiKey: 'testkey',
+        userName: 'testuser',
+      }),
+    );
+    const createAddFundsSpy = trackSpy(
+      spyOn(usersApi, 'createAddFundsRequest').mockResolvedValue({
+        tokenId: 'abc123token',
+        redirectUrl: 'https://namecheap.com/payment/abc123',
+        returnUrl: 'https://mysite.com/callback',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(addFundsCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'add-funds',
+      '--amount',
+      '50',
+      '--return-url',
+      'https://mysite.com/callback',
+    ]);
+
+    expect(createAddFundsSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        username: 'testuser',
+        amount: 50,
+        returnUrl: 'https://mysite.com/callback',
+      }),
+    );
+    expect(logs.some((l) => l.includes('abc123token'))).toBe(true);
+    expect(logs.some((l) => l.includes('https://namecheap.com/payment/abc123'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(config, 'getCredentials').mockReturnValue({
+        apiUser: 'testuser',
+        apiKey: 'testkey',
+        userName: 'testuser',
+      }),
+    );
+    trackSpy(
+      spyOn(usersApi, 'createAddFundsRequest').mockResolvedValue({
+        tokenId: 'abc123token',
+        redirectUrl: 'https://namecheap.com/payment/abc123',
+        returnUrl: 'https://mysite.com/callback',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(addFundsCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'add-funds',
+      '--amount',
+      '50',
+      '--return-url',
+      'https://mysite.com/callback',
+      '--json',
+    ]);
+
+    const jsonOutput = logs.find((l) => l.includes('tokenId'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.tokenId).toBe('abc123token');
+    expect(parsed.redirectUrl).toBe('https://namecheap.com/payment/abc123');
+  });
+
+  test('exits with code 1 when missing --amount', async () => {
+    const program = new Command();
+    program.addCommand(addFundsCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'add-funds',
+        '--return-url',
+        'https://mysite.com/callback',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('exits with code 1 when missing --return-url', async () => {
+    const program = new Command();
+    program.addCommand(addFundsCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'add-funds', '--amount', '50']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('exits with code 1 when amount is invalid', async () => {
+    trackSpy(
+      spyOn(config, 'getCredentials').mockReturnValue({
+        apiUser: 'testuser',
+        apiKey: 'testkey',
+        userName: 'testuser',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(addFundsCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'add-funds',
+        '--amount',
+        'invalid',
+        '--return-url',
+        'https://mysite.com/callback',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+});
+
+describe('users funds-status command', () => {
+  test('displays status info for token', async () => {
+    const getAddFundsStatusSpy = trackSpy(
+      spyOn(usersApi, 'getAddFundsStatus').mockResolvedValue({
+        transactionId: 'txn-12345',
+        amount: 100.0,
+        status: 'COMPLETED',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(fundsStatusCommand);
+    await program.parseAsync(['node', 'test', 'funds-status', 'abc123token']);
+
+    expect(getAddFundsStatusSpy).toHaveBeenCalledWith(expect.anything(), 'abc123token');
+    expect(logs.some((l) => l.includes('txn-12345'))).toBe(true);
+    expect(logs.some((l) => l.includes('$100.00'))).toBe(true);
+    expect(logs.some((l) => l.includes('COMPLETED'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(usersApi, 'getAddFundsStatus').mockResolvedValue({
+        transactionId: 'txn-12345',
+        amount: 100.0,
+        status: 'COMPLETED',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(fundsStatusCommand);
+    await program.parseAsync(['node', 'test', 'funds-status', 'abc123token', '--json']);
+
+    const jsonOutput = logs.find((l) => l.includes('transactionId'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.transactionId).toBe('txn-12345');
+    expect(parsed.amount).toBe(100.0);
+    expect(parsed.status).toBe('COMPLETED');
+  });
+
+  test('handles different status values', async () => {
+    trackSpy(
+      spyOn(usersApi, 'getAddFundsStatus').mockResolvedValue({
+        transactionId: '',
+        amount: 50.0,
+        status: 'CREATED',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(fundsStatusCommand);
+    await program.parseAsync(['node', 'test', 'funds-status', 'pending-token']);
+
+    expect(logs.some((l) => l.includes('CREATED'))).toBe(true);
+    expect(logs.some((l) => l.includes('$50.00'))).toBe(true);
+  });
+});
+
+describe('users change-password command', () => {
+  test('changes password with --old-password and shows success', async () => {
+    const changePasswordSpy = trackSpy(
+      spyOn(usersApi, 'changePassword').mockResolvedValue({
+        success: true,
+        userId: '12345',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(changePasswordCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'change-password',
+      '--old-password',
+      'OldPass123',
+      '--new-password',
+      'NewPass456!',
+    ]);
+
+    expect(changePasswordSpy).toHaveBeenCalledWith(expect.anything(), {
+      oldPassword: 'OldPass123',
+      newPassword: 'NewPass456!',
+    });
+    expect(logs.some((l) => l.includes('Password changed successfully'))).toBe(true);
+    expect(logs.some((l) => l.includes('12345'))).toBe(true);
+  });
+
+  test('changes password with --reset-code and shows success', async () => {
+    const changePasswordSpy = trackSpy(
+      spyOn(usersApi, 'changePassword').mockResolvedValue({
+        success: true,
+        userId: '12345',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(changePasswordCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'change-password',
+      '--reset-code',
+      'RESET-ABC-123',
+      '--new-password',
+      'NewPass456!',
+    ]);
+
+    expect(changePasswordSpy).toHaveBeenCalledWith(expect.anything(), {
+      resetCode: 'RESET-ABC-123',
+      newPassword: 'NewPass456!',
+    });
+    expect(logs.some((l) => l.includes('Password changed successfully'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(usersApi, 'changePassword').mockResolvedValue({
+        success: true,
+        userId: '12345',
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(changePasswordCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'change-password',
+      '--old-password',
+      'OldPass123',
+      '--new-password',
+      'NewPass456!',
+      '--json',
+    ]);
+
+    const jsonOutput = logs.find((l) => l.includes('userId'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.success).toBe(true);
+    expect(parsed.userId).toBe('12345');
+  });
+
+  test('exits with code 1 without --old-password or --reset-code', async () => {
+    const program = new Command();
+    program.addCommand(changePasswordCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'change-password',
+        '--new-password',
+        'NewPass456!',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+    expect(errors.some((l) => l.includes('--old-password or --reset-code is required'))).toBe(true);
+  });
+
+  test('exits with code 1 when both --old-password and --reset-code provided', async () => {
+    const program = new Command();
+    program.addCommand(changePasswordCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'change-password',
+        '--old-password',
+        'OldPass123',
+        '--reset-code',
+        'RESET-ABC-123',
+        '--new-password',
+        'NewPass456!',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+    expect(errors.some((l) => l.includes('Cannot use both'))).toBe(true);
+  });
+
+  test('exits with code 1 when missing --new-password', async () => {
+    const program = new Command();
+    program.addCommand(changePasswordCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'change-password', '--old-password', 'OldPass123']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+});
+
+describe('users reset-password command', () => {
+  test('requests reset with --find-by and --value, shows success', async () => {
+    const resetPasswordSpy = trackSpy(
+      spyOn(usersApi, 'resetPassword').mockResolvedValue({
+        success: true,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(resetPasswordCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'reset-password',
+      '--find-by',
+      'email',
+      '--value',
+      'user@example.com',
+    ]);
+
+    expect(resetPasswordSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        findBy: 'EMAILADDRESS',
+        findByValue: 'user@example.com',
+      }),
+    );
+    expect(logs.some((l) => l.includes('Password reset email sent successfully'))).toBe(true);
+  });
+
+  test('supports username find-by option', async () => {
+    const resetPasswordSpy = trackSpy(
+      spyOn(usersApi, 'resetPassword').mockResolvedValue({
+        success: true,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(resetPasswordCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'reset-password',
+      '--find-by',
+      'username',
+      '--value',
+      'testuser',
+    ]);
+
+    expect(resetPasswordSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        findBy: 'USERNAME',
+        findByValue: 'testuser',
+      }),
+    );
+  });
+
+  test('supports domain find-by option', async () => {
+    const resetPasswordSpy = trackSpy(
+      spyOn(usersApi, 'resetPassword').mockResolvedValue({
+        success: true,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(resetPasswordCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'reset-password',
+      '--find-by',
+      'domain',
+      '--value',
+      'example.com',
+    ]);
+
+    expect(resetPasswordSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        findBy: 'DOMAINNAME',
+        findByValue: 'example.com',
+      }),
+    );
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(usersApi, 'resetPassword').mockResolvedValue({
+        success: true,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(resetPasswordCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'reset-password',
+      '--find-by',
+      'email',
+      '--value',
+      'user@example.com',
+      '--json',
+    ]);
+
+    const jsonOutput = logs.find((l) => l.includes('success'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.success).toBe(true);
+  });
+
+  test('exits with code 1 for invalid --find-by value', async () => {
+    const program = new Command();
+    program.addCommand(resetPasswordCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'reset-password',
+        '--find-by',
+        'invalid',
+        '--value',
+        'test@example.com',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+    expect(errors.some((l) => l.includes('Invalid --find-by value'))).toBe(true);
+  });
+
+  test('exits with code 1 when missing required options', async () => {
+    const program = new Command();
+    program.addCommand(resetPasswordCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'reset-password', '--find-by', 'email']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+});
+
+describe('users login command', () => {
+  test('shows success for valid credentials', async () => {
+    const loginUserSpy = trackSpy(
+      spyOn(usersApi, 'loginUser').mockResolvedValue({
+        username: 'testuser',
+        loginSuccess: true,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(loginCommand);
+    await program.parseAsync(['node', 'test', 'login', 'testuser', '--password', 'TestPass123!']);
+
+    expect(loginUserSpy).toHaveBeenCalledWith(expect.anything(), 'testuser', 'TestPass123!');
+    expect(logs.some((l) => l.includes('Login successful'))).toBe(true);
+    expect(logs.some((l) => l.includes('testuser'))).toBe(true);
+  });
+
+  test('shows failure for invalid credentials', async () => {
+    trackSpy(
+      spyOn(usersApi, 'loginUser').mockResolvedValue({
+        username: 'wronguser',
+        loginSuccess: false,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(loginCommand);
+    await program.parseAsync(['node', 'test', 'login', 'wronguser', '--password', 'BadPassword']);
+
+    expect(errors.some((l) => l.includes('Login failed'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag for success', async () => {
+    trackSpy(
+      spyOn(usersApi, 'loginUser').mockResolvedValue({
+        username: 'testuser',
+        loginSuccess: true,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(loginCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'login',
+      'testuser',
+      '--password',
+      'TestPass123!',
+      '--json',
+    ]);
+
+    const jsonOutput = logs.find((l) => l.includes('loginSuccess'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.username).toBe('testuser');
+    expect(parsed.loginSuccess).toBe(true);
+  });
+
+  test('outputs JSON with --json flag for failure', async () => {
+    trackSpy(
+      spyOn(usersApi, 'loginUser').mockResolvedValue({
+        username: 'testuser',
+        loginSuccess: false,
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(loginCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'login',
+      'testuser',
+      '--password',
+      'BadPassword',
+      '--json',
+    ]);
+
+    const jsonOutput = logs.find((l) => l.includes('loginSuccess'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.loginSuccess).toBe(false);
+  });
+
+  test('exits with code 1 when missing --password', async () => {
+    const program = new Command();
+    program.addCommand(loginCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'login', 'testuser']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('exits with code 1 when missing username argument', async () => {
+    const program = new Command();
+    program.addCommand(loginCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'login', '--password', 'TestPass123!']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
   });
 });

@@ -1,6 +1,16 @@
 import { describe, expect, test, mock, beforeEach, afterEach } from 'bun:test';
 import { NamecheapClient } from '../../../src/lib/api/client.js';
-import { getBalances, getPricing } from '../../../src/lib/api/users.js';
+import {
+  getBalances,
+  getPricing,
+  changePassword,
+  updateUser,
+  createAddFundsRequest,
+  getAddFundsStatus,
+  createUser,
+  loginUser,
+  resetPassword,
+} from '../../../src/lib/api/users.js';
 import { ApiError } from '../../../src/utils/errors.js';
 
 const mockCredentials = {
@@ -122,6 +132,94 @@ const pricingErrorXml = `<?xml version="1.0" encoding="utf-8"?>
   </Errors>
   <Warnings />
   <CommandResponse />
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const changePasswordSuccessXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.changePassword">
+    <UserChangePasswordResult Success="true" UserId="12345" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const userUpdateSuccessXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.update">
+    <UserUpdateResult Success="true" UserId="12345" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const addFundsRequestSuccessXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.createaddfundsrequest">
+    <Createaddfundsrequestresult TokenId="abc123token" RedirectURL="https://pay.namecheap.com/checkout/abc123" ReturnURL="https://example.com/return" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const getAddFundsStatusSuccessXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.getAddFundsStatus">
+    <GetAddFundsStatusResult TransactionId="TXN987654" Amount="50.00" Status="COMPLETED" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const createUserSuccessXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.create">
+    <UserCreateResult Success="true" UserId="67890" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const loginUserSuccessXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.login">
+    <UserLoginResult UserName="johndoe" LoginSuccess="true" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const loginUserFailedXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.login">
+    <UserLoginResult UserName="johndoe" LoginSuccess="false" />
+  </CommandResponse>
+  <Server>PHX01APIEXT05</Server>
+  <ExecutionTime>0.1</ExecutionTime>
+</ApiResponse>`;
+
+const resetPasswordSuccessXml = `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.users.resetPassword">
+    <UserResetPasswordResult Success="true" />
+  </CommandResponse>
   <Server>PHX01APIEXT05</Server>
   <ExecutionTime>0.1</ExecutionTime>
 </ApiResponse>`;
@@ -374,5 +472,470 @@ describe('getPricing', () => {
     const productNames = pricing.map((p) => p.productName);
     expect(productNames).toContain('com');
     expect(productNames).toContain('net');
+  });
+});
+
+describe('changePassword', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns success and userId with old password flow', async () => {
+    mockFetch(changePasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await changePassword(client, {
+      oldPassword: 'oldPass123',
+      newPassword: 'newPass456',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.userId).toBe('12345');
+  });
+
+  test('sends correct params for old password flow', async () => {
+    const fetchMock = mockFetch(changePasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await changePassword(client, {
+      oldPassword: 'oldPass123',
+      newPassword: 'newPass456',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('OldPassword=oldPass123');
+    expect(callUrl).toContain('NewPassword=newPass456');
+  });
+
+  test('sends correct params for reset code flow', async () => {
+    const fetchMock = mockFetch(changePasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await changePassword(client, {
+      resetCode: 'RESET123',
+      newPassword: 'newPass456',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('ResetCode=RESET123');
+    expect(callUrl).toContain('NewPassword=newPass456');
+    expect(callUrl).not.toContain('OldPassword');
+  });
+});
+
+describe('updateUser', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns success and userId', async () => {
+    mockFetch(userUpdateSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await updateUser(client, {
+      firstName: 'John',
+      lastName: 'Doe',
+      address1: '123 Main St',
+      city: 'New York',
+      stateProvince: 'NY',
+      zip: '10001',
+      country: 'US',
+      email: 'john@example.com',
+      phone: '+1.5551234567',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.userId).toBe('12345');
+  });
+
+  test('sends all required user fields', async () => {
+    const fetchMock = mockFetch(userUpdateSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await updateUser(client, {
+      firstName: 'John',
+      lastName: 'Doe',
+      address1: '123 Main St',
+      city: 'New York',
+      stateProvince: 'NY',
+      zip: '10001',
+      country: 'US',
+      email: 'john@example.com',
+      phone: '+1.5551234567',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('FirstName=John');
+    expect(callUrl).toContain('LastName=Doe');
+    expect(callUrl).toContain('Address1=123');
+    expect(callUrl).toContain('City=New');
+    expect(callUrl).toContain('StateProvince=NY');
+    expect(callUrl).toContain('Zip=10001');
+    expect(callUrl).toContain('Country=US');
+    expect(callUrl).toContain('EmailAddress=john');
+    expect(callUrl).toContain('Phone=');
+  });
+
+  test('sends optional fields when provided', async () => {
+    const fetchMock = mockFetch(userUpdateSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await updateUser(client, {
+      firstName: 'John',
+      lastName: 'Doe',
+      jobTitle: 'Developer',
+      organization: 'Acme Inc',
+      address1: '123 Main St',
+      address2: 'Suite 100',
+      city: 'New York',
+      stateProvince: 'NY',
+      zip: '10001',
+      country: 'US',
+      email: 'john@example.com',
+      phone: '+1.5551234567',
+      phoneExt: '123',
+      fax: '+1.5559876543',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('JobTitle=Developer');
+    expect(callUrl).toContain('Organization=Acme');
+    expect(callUrl).toContain('Address2=Suite');
+    expect(callUrl).toContain('PhoneExt=123');
+    expect(callUrl).toContain('Fax=');
+  });
+});
+
+describe('createAddFundsRequest', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns tokenId, redirectUrl, and returnUrl', async () => {
+    mockFetch(addFundsRequestSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await createAddFundsRequest(client, {
+      username: 'testuser',
+      amount: 50,
+      returnUrl: 'https://example.com/return',
+    });
+
+    expect(result.tokenId).toBe('abc123token');
+    expect(result.redirectUrl).toBe('https://pay.namecheap.com/checkout/abc123');
+    expect(result.returnUrl).toBe('https://example.com/return');
+  });
+
+  test('sends correct params', async () => {
+    const fetchMock = mockFetch(addFundsRequestSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await createAddFundsRequest(client, {
+      username: 'testuser',
+      amount: 50,
+      returnUrl: 'https://example.com/return',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('Username=testuser');
+    expect(callUrl).toContain('Amount=50');
+    expect(callUrl).toContain('PaymentType=Creditcard');
+    expect(callUrl).toContain('ReturnUrl=');
+  });
+});
+
+describe('getAddFundsStatus', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns transactionId, amount, and status', async () => {
+    mockFetch(getAddFundsStatusSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await getAddFundsStatus(client, 'abc123token');
+
+    expect(result.transactionId).toBe('TXN987654');
+    expect(result.amount).toBe(50);
+    expect(result.status).toBe('COMPLETED');
+  });
+
+  test('sends tokenId param', async () => {
+    const fetchMock = mockFetch(getAddFundsStatusSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await getAddFundsStatus(client, 'abc123token');
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('TokenId=abc123token');
+  });
+});
+
+describe('createUser', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns success and userId', async () => {
+    mockFetch(createUserSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await createUser(client, {
+      username: 'newuser',
+      password: 'password123',
+      email: 'new@example.com',
+      acceptTerms: true,
+      firstName: 'Jane',
+      lastName: 'Doe',
+      address1: '456 Oak Ave',
+      city: 'Los Angeles',
+      stateProvince: 'CA',
+      zip: '90001',
+      country: 'US',
+      phone: '+1.5559998888',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.userId).toBe('67890');
+  });
+
+  test('sends all required fields', async () => {
+    const fetchMock = mockFetch(createUserSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await createUser(client, {
+      username: 'newuser',
+      password: 'password123',
+      email: 'new@example.com',
+      acceptTerms: true,
+      firstName: 'Jane',
+      lastName: 'Doe',
+      address1: '456 Oak Ave',
+      city: 'Los Angeles',
+      stateProvince: 'CA',
+      zip: '90001',
+      country: 'US',
+      phone: '+1.5559998888',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('NewUserName=newuser');
+    expect(callUrl).toContain('NewUserPassword=password123');
+    expect(callUrl).toContain('EmailAddress=new');
+    expect(callUrl).toContain('AcceptTerms=1');
+    expect(callUrl).toContain('FirstName=Jane');
+    expect(callUrl).toContain('LastName=Doe');
+    expect(callUrl).toContain('Address1=456');
+    expect(callUrl).toContain('City=Los');
+    expect(callUrl).toContain('StateProvince=CA');
+    expect(callUrl).toContain('Zip=90001');
+    expect(callUrl).toContain('Country=US');
+    expect(callUrl).toContain('Phone=');
+  });
+
+  test('sends optional fields when provided', async () => {
+    const fetchMock = mockFetch(createUserSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await createUser(client, {
+      username: 'newuser',
+      password: 'password123',
+      email: 'new@example.com',
+      ignoreDuplicateEmail: true,
+      acceptTerms: true,
+      acceptNews: false,
+      firstName: 'Jane',
+      lastName: 'Doe',
+      jobTitle: 'Manager',
+      organization: 'Corp Inc',
+      address1: '456 Oak Ave',
+      address2: 'Floor 2',
+      city: 'Los Angeles',
+      stateProvince: 'CA',
+      zip: '90001',
+      country: 'US',
+      phone: '+1.5559998888',
+      phoneExt: '456',
+      fax: '+1.5557776666',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('IgnoreDuplicateEmailAddress=yes');
+    expect(callUrl).toContain('AcceptNews=0');
+    expect(callUrl).toContain('JobTitle=Manager');
+    expect(callUrl).toContain('Organization=Corp');
+    expect(callUrl).toContain('Address2=Floor');
+    expect(callUrl).toContain('PhoneExt=456');
+    expect(callUrl).toContain('Fax=');
+  });
+});
+
+describe('loginUser', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns username and loginSuccess on successful login', async () => {
+    mockFetch(loginUserSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await loginUser(client, 'johndoe', 'password123');
+
+    expect(result.username).toBe('johndoe');
+    expect(result.loginSuccess).toBe(true);
+  });
+
+  test('returns loginSuccess false on failed login', async () => {
+    mockFetch(loginUserFailedXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await loginUser(client, 'johndoe', 'wrongpassword');
+
+    expect(result.username).toBe('johndoe');
+    expect(result.loginSuccess).toBe(false);
+  });
+
+  test('sends correct params', async () => {
+    const fetchMock = mockFetch(loginUserSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await loginUser(client, 'johndoe', 'password123');
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('UserName=johndoe');
+    expect(callUrl).toContain('Password=password123');
+  });
+});
+
+describe('resetPassword', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns success', async () => {
+    mockFetch(resetPasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    const result = await resetPassword(client, {
+      findBy: 'EMAILADDRESS',
+      findByValue: 'user@example.com',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  test('sends correct params with EMAILADDRESS findBy', async () => {
+    const fetchMock = mockFetch(resetPasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await resetPassword(client, {
+      findBy: 'EMAILADDRESS',
+      findByValue: 'user@example.com',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('FindBy=EMAILADDRESS');
+    expect(callUrl).toContain('FindByValue=user');
+  });
+
+  test('sends correct params with DOMAINNAME findBy', async () => {
+    const fetchMock = mockFetch(resetPasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await resetPassword(client, {
+      findBy: 'DOMAINNAME',
+      findByValue: 'example.com',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('FindBy=DOMAINNAME');
+    expect(callUrl).toContain('FindByValue=example.com');
+  });
+
+  test('sends correct params with USERNAME findBy', async () => {
+    const fetchMock = mockFetch(resetPasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await resetPassword(client, {
+      findBy: 'USERNAME',
+      findByValue: 'johndoe',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('FindBy=USERNAME');
+    expect(callUrl).toContain('FindByValue=johndoe');
+  });
+
+  test('sends optional email params when provided', async () => {
+    const fetchMock = mockFetch(resetPasswordSuccessXml);
+
+    const client = new NamecheapClient(mockCredentials, true);
+    await resetPassword(client, {
+      findBy: 'EMAILADDRESS',
+      findByValue: 'user@example.com',
+      emailFromName: 'Support Team',
+      emailFrom: 'support@company.com',
+      urlPattern: 'https://company.com/reset?code=[RESETCODE]',
+    });
+
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    const callUrl = calls[0]?.[0] ?? '';
+    expect(callUrl).toContain('EmailFromName=Support');
+    expect(callUrl).toContain('EmailFrom=support');
+    expect(callUrl).toContain('URLPattern=');
   });
 });
