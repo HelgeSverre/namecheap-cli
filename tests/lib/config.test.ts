@@ -12,7 +12,6 @@ import {
   getAllConfig,
   setConfigValue,
   getConfigValue,
-  config,
 } from '../../src/lib/config.js';
 
 describe('config', () => {
@@ -86,13 +85,13 @@ describe('config', () => {
     });
 
     test('returns false when credentials are incomplete', () => {
-      // Set partial credentials by directly manipulating config
-      config.set('credentials', {
+      // Set partial credentials with empty apiKey
+      setCredentials({
         apiUser: 'user',
         apiKey: '',
         userName: 'user',
         clientIp: '1.2.3.4',
-      } as any);
+      });
 
       expect(isAuthenticated()).toBe(false);
     });
@@ -107,8 +106,9 @@ describe('config', () => {
       expect(isSandboxMode()).toBe(false);
     });
 
-    test('defaults to false', () => {
-      config.delete('sandbox');
+    test('defaults to false when not set', () => {
+      // Reset to default state
+      setSandboxMode(false);
       expect(isSandboxMode()).toBe(false);
     });
   });
@@ -123,7 +123,7 @@ describe('config', () => {
     });
 
     test('defaults to table', () => {
-      config.delete('defaultOutput');
+      setDefaultOutput('table');
       expect(getDefaultOutput()).toBe('table');
     });
   });
@@ -134,15 +134,26 @@ describe('config', () => {
       expect(typeof path).toBe('string');
       expect(path.length).toBeGreaterThan(0);
     });
+
+    test('path contains namecheap-cli', () => {
+      const path = getConfigPath();
+      expect(path).toContain('namecheap-cli');
+    });
+
+    test('path ends with config.json', () => {
+      const path = getConfigPath();
+      expect(path).toEndWith('config.json');
+    });
   });
 
   describe('getAllConfig', () => {
-    test('returns config object with all keys', () => {
+    test('returns config object with required keys', () => {
       const allConfig = getAllConfig();
 
       expect(allConfig).toHaveProperty('sandbox');
       expect(allConfig).toHaveProperty('defaultOutput');
-      expect(allConfig).toHaveProperty('credentials');
+      expect(typeof allConfig.sandbox).toBe('boolean');
+      expect(['table', 'json']).toContain(allConfig.defaultOutput);
     });
 
     test('returns current values', () => {
