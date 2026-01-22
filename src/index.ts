@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
+import { addressCommand } from './commands/address/index.js';
 import { authCommand } from './commands/auth/index.js';
 import { completionsCommand } from './commands/completions/index.js';
 import { configCommand } from './commands/config/index.js';
@@ -23,6 +24,7 @@ program
   .helpOption('-h, --help', 'Display help for command');
 
 // Register commands
+program.addCommand(addressCommand);
 program.addCommand(authCommand);
 program.addCommand(domainsCommand);
 program.addCommand(dnsCommand);

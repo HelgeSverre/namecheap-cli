@@ -217,13 +217,27 @@ export type ApiCommand =
   // Users
   | 'namecheap.users.getBalances'
   | 'namecheap.users.getPricing'
+  | 'namecheap.users.changePassword'
+  | 'namecheap.users.update'
+  | 'namecheap.users.createaddfundsrequest'
+  | 'namecheap.users.getAddFundsStatus'
+  | 'namecheap.users.create'
+  | 'namecheap.users.login'
+  | 'namecheap.users.resetPassword'
   // WhoisGuard
   | 'namecheap.whoisguard.getList'
   | 'namecheap.whoisguard.enable'
   | 'namecheap.whoisguard.disable'
   | 'namecheap.whoisguard.allot'
   | 'namecheap.whoisguard.unallot'
-  | 'namecheap.whoisguard.renew';
+  | 'namecheap.whoisguard.renew'
+  // Users Address
+  | 'namecheap.users.address.create'
+  | 'namecheap.users.address.delete'
+  | 'namecheap.users.address.getInfo'
+  | 'namecheap.users.address.getList'
+  | 'namecheap.users.address.setDefault'
+  | 'namecheap.users.address.update';
 
 // Pagination
 export interface PaginationParams {
