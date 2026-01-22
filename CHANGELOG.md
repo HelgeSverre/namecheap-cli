@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Domain Parsing**: Added `tldts` library for proper public suffix domain parsing
+  - Correctly handles multi-part TLDs like `.co.uk`, `.com.au`
+  - Automatically strips subdomains (e.g., `www.example.com` → `example.com`)
+  - Centralized parsing in `src/utils/domain.ts`
+
+- **Error Handling**: Replaced stringly-typed API errors with structured `ApiError` class
+  - `ApiError.errors[]` contains structured error codes and messages
+  - Better error formatting in CLI output
+  - Consistent error handling across all API modules
+
+- **API Consistency**: 
+  - `users.ts` now uses `NamecheapClient.handleResponse()` like other modules
+  - Standardized WhoisGuard parameter naming to `WhoisguardID`
+
+### Fixed
+
+- **IP Validation**: Now properly rejects invalid IPs like `999.999.999.999` and accepts IPv6 shorthand like `::1`
+- **Date Formatting**: `formatDate()` properly handles invalid date strings
+
+### Added
+
+- **Test Coverage**: Added 97 new tests (379 → 476 total)
+  - `tests/lib/api/ns.test.ts` - Nameserver API tests
+  - `tests/lib/api/whoisguard.test.ts` - WhoisGuard API tests
+  - `tests/lib/api/users.test.ts` - Users API tests
+  - `tests/utils/domain.test.ts` - Domain parsing tests
+
 ## [0.1.0] - 2026-01-21
 
 ### Installation

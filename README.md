@@ -4,18 +4,8 @@
 [![CI](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, WhoisGuard privacy protection, and more. Built with Bun and TypeScript.
-
-## Features
-
-- 🌐 **Domain Management** - Register, renew, lock/unlock, and manage domain contacts
-- 📋 **DNS Records** - Full CRUD operations for A, AAAA, CNAME, MX, TXT, and more
-- 🔒 **WhoisGuard Privacy** - Enable/disable privacy protection for your domains
-- 🌍 **Nameserver Management** - Set custom nameservers and manage child nameservers
-- 📧 **Email Forwarding** - Configure email forwarding rules
-- 🔑 **Secure Configuration** - API credentials stored locally with encryption
-- 🎨 **Multiple Output Formats** - Table (default) or JSON output
-- 🧪 **Sandbox Mode** - Test commands safely without affecting production
+A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, WhoisGuard privacy
+protection, and more. Built with Bun and TypeScript.
 
 ## Installation
 
@@ -219,7 +209,7 @@ namecheap config set output json
 ### Common Errors
 
 | Error                 | Solution                                           |
-| --------------------- | -------------------------------------------------- |
+|-----------------------|----------------------------------------------------|
 | "Not authenticated"   | Run `namecheap auth login`                         |
 | "IP not whitelisted"  | Add your IP at Namecheap > Profile > API Access    |
 | "API access disabled" | Enable at Namecheap > Profile > Tools > API Access |
