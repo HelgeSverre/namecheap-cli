@@ -44,7 +44,14 @@
     "test": "echo  'Run tests via bun test, instead of bun run test' && exit 1",
     "test:coverage": "bun test --coverage",
     "test:watch": "bun test --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:binary": "bun build src/index.ts --compile --outfile dist/namecheap",
+    "build:binary:linux": "bun build src/index.ts --compile --target=bun-linux-x64 --outfile dist/namecheap-linux-x64",
+    "build:binary:linux-arm": "bun build src/index.ts --compile --target=bun-linux-arm64 --outfile dist/namecheap-linux-arm64",
+    "build:binary:macos": "bun build src/index.ts --compile --target=bun-darwin-x64 --outfile dist/namecheap-darwin-x64",
+    "build:binary:macos-arm": "bun build src/index.ts --compile --target=bun-darwin-arm64 --outfile dist/namecheap-darwin-arm64",
+    "build:binary:windows": "bun build src/index.ts --compile --target=bun-windows-x64 --outfile dist/namecheap-windows-x64.exe",
+    "build:all": "bun run build:binary:linux && bun run build:binary:linux-arm && bun run build:binary:macos && bun run build:binary:macos-arm && bun run build:binary:windows"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.2.0",
@@ -53,7 +60,8 @@
     "commander": "^14.0.2",
     "fast-xml-parser": "^5.3.3",
     "ora": "^9.1.0",
-    "tldts": "^7.0.19"
+    "tldts": "^7.0.19",
+    "update-notifier": "^7.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
