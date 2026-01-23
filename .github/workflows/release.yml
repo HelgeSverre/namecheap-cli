@@ -91,7 +91,7 @@ jobs:
         run: |
           mkdir -p release
           cp dist/index.js release/
-          
+
           # Move binaries to release folder and compress
           for dir in binaries/*/; do
             artifact_name=$(basename "$dir")
@@ -102,7 +102,7 @@ jobs:
               chmod +x "release/$artifact_name"
             fi
           done
-          
+
           # Create tarballs for Unix binaries
           cd release
           for f in namecheap-linux-* namecheap-darwin-*; do
@@ -111,7 +111,7 @@ jobs:
               rm "$f"
             fi
           done
-          
+
           # Zip Windows binary
           if [ -f "namecheap-windows-x64.exe" ]; then
             zip namecheap-windows-x64.zip namecheap-windows-x64.exe

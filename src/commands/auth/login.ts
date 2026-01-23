@@ -28,9 +28,7 @@ export const loginCommand = new Command('login')
           clientIp = await withSpinner('Detecting public IP...', async () => {
             const ip = await detectPublicIp();
             if (!ip) {
-              throw new Error(
-                'Could not detect public IP. Please provide --client-ip manually.',
-              );
+              throw new Error('Could not detect public IP. Please provide --client-ip manually.');
             }
             return ip;
           });
