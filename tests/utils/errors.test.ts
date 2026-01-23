@@ -40,6 +40,13 @@ describe('parseApiErrorCode', () => {
     expect(result?.message).toBe('Rate limit exceeded');
   });
 
+  test('returns error info for expired domain error', () => {
+    const result = parseApiErrorCode('2020166');
+    expect(result).not.toBeNull();
+    expect(result?.message).toBe('Domain has expired and cannot be renewed');
+    expect(result?.suggestion).toContain('reactivate');
+  });
+
   test('returns null for unknown error codes', () => {
     const result = parseApiErrorCode('9999999');
     expect(result).toBeNull();

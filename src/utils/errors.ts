@@ -16,7 +16,7 @@ export const API_ERROR_MAP: Record<string, { message: string; suggestion: string
   '1011151': {
     message: 'Your IP address is not whitelisted',
     suggestion:
-      'Add your IP at https://ap.www.namecheap.com/settings/tools/apiaccess/whitelisted-ips',
+      'Run "namecheap auth status" to see your current IP, then add it at https://ap.www.namecheap.com/settings/tools/apiaccess/whitelisted-ips',
   },
   '1011152': {
     message: 'Sandbox API access is disabled',
@@ -44,6 +44,12 @@ export const API_ERROR_MAP: Record<string, { message: string; suggestion: string
   '2030288': {
     message: 'DNS records cannot be modified',
     suggestion: 'Ensure the domain is using Namecheap DNS servers',
+  },
+
+  // Domain status errors (2020xxx)
+  '2020166': {
+    message: 'Domain has expired and cannot be renewed',
+    suggestion: 'Use "namecheap domains reactivate <domain>" instead of renew',
   },
 
   // Rate limiting (3031xxx)
