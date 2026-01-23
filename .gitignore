@@ -3,6 +3,11 @@ node_modules
 bun.lockb
 *.lock
 
+# Next.js (website)
+.next
+out
+.vercel
+
 # Build output
 out
 dist
