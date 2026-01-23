@@ -44,17 +44,27 @@ export interface AuthPromptResult {
   sandbox: boolean;
 }
 
+const IP_SERVICES = [
+  { url: 'https://api.ipify.org?format=json', parse: (data: { ip: string }) => data.ip },
+  { url: 'https://api.my-ip.io/v2/ip.json', parse: (data: { ip: string }) => data.ip },
+  { url: 'https://ipinfo.io/json', parse: (data: { ip: string }) => data.ip },
+  { url: 'https://api.ip.sb/jsonip', parse: (data: { ip: string }) => data.ip },
+];
+
 export async function detectPublicIp(): Promise<string | null> {
-  try {
-    const response = await fetch('https://api.ipify.org?format=json', {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (response.ok) {
-      const data = (await response.json()) as { ip: string };
-      return data.ip;
+  for (const service of IP_SERVICES) {
+    try {
+      const response = await fetch(service.url, {
+        signal: AbortSignal.timeout(3000),
+      });
+      if (response.ok) {
+        const data = (await response.json()) as { ip: string };
+        const ip = service.parse(data);
+        if (ip) return ip;
+      }
+    } catch {
+      // Try next service
     }
-  } catch {
-    // Ignore errors, IP detection is optional
   }
   return null;
 }
