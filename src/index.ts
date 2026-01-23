@@ -10,6 +10,7 @@ import { domainsCommand } from './commands/domains/index.js';
 import { nsCommand } from './commands/ns/index.js';
 import { usersCommand } from './commands/users/index.js';
 import { whoisguardCommand } from './commands/whoisguard/index.js';
+import { checkForUpdates } from './utils/update-check.js';
 
 const packageJson = {
   name: 'namecheap-cli',
@@ -47,6 +48,9 @@ Examples:
   $ namecheap users pricing register com  # Get domain pricing
 `,
 );
+
+// Check for updates
+checkForUpdates();
 
 // Parse command line arguments
 program.parse(process.argv);
