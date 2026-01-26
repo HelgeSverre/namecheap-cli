@@ -1,8 +1,12 @@
 # Namecheap CLI
 
-[![npm version](https://img.shields.io/npm/v/namecheap-cli.svg)](https://www.npmjs.com/package/namecheap-cli)
-[![CI](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+## A cli for managing Namecheap domains and DNS via the command line.
+
+[![npm version](https://img.shields.io/npm/v/namecheap-cli?style=flat-square&color=FE5803&label=npm)](https://www.npmjs.com/package/namecheap-cli)
+[![npm downloads](https://img.shields.io/npm/dm/namecheap-cli?style=flat-square&color=FF8C44&label=downloads)](https://www.npmjs.com/package/namecheap-cli)
+[![CI](https://img.shields.io/github/actions/workflow/status/HelgeSverre/namecheap-cli/ci.yml?style=flat-square&label=CI)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/HelgeSverre/namecheap-cli?style=flat-square&color=FE5803)](https://github.com/HelgeSverre/namecheap-cli)
+[![License](https://img.shields.io/badge/license-MIT-6E6F71?style=flat-square)](https://opensource.org/licenses/MIT)
 
 A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, WhoisGuard privacy
 protection, and more. Built with Bun and TypeScript.
@@ -179,6 +183,18 @@ Get sandbox credentials at: https://www.sandbox.namecheap.com
 Enable tab completion for your shell:
 
 ```bash
+# Automatic install (auto-detects your shell)
+namecheap completions install
+
+# Or install for a specific shell
+namecheap completions install --shell bash
+namecheap completions install --shell zsh
+namecheap completions install --shell fish
+
+# macOS with Homebrew: install to Homebrew's completion directories
+namecheap completions install --homebrew
+
+# Manual setup (alternative)
 # Bash - Add to ~/.bashrc
 eval "$(namecheap completions bash)"
 
@@ -187,6 +203,12 @@ eval "$(namecheap completions zsh)"
 
 # Fish - Add to ~/.config/fish/config.fish
 namecheap completions fish | source
+```
+
+To uninstall completions:
+
+```bash
+namecheap completions uninstall
 ```
 
 ## Output Formats

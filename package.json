@@ -18,7 +18,11 @@
     "url": "https://github.com/helgesverre/namecheap-cli.git"
   },
   "license": "MIT",
-  "author": "Helge Sverre <helge.sverre@gmail.com",
+  "author": {
+    "name": "Helge Sverre",
+    "email": "helge.sverre@gmail.com",
+    "url": "https://github.com/helgesverre"
+  },
   "type": "module",
   "module": "src/index.ts",
   "bin": {
@@ -26,11 +30,13 @@
   },
   "files": [
     "dist",
+    "scripts",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
+    "postinstall": "node scripts/postinstall.js || true",
     "build": "bun build src/index.ts --outdir dist --target node",
     "check": "bun run typecheck && bun run lint && bun run format:check",
     "dev": "bun run src/index.ts",
@@ -51,7 +57,8 @@
     "build:binary:macos": "bun build src/index.ts --compile --target=bun-darwin-x64 --outfile dist/namecheap-darwin-x64",
     "build:binary:macos-arm": "bun build src/index.ts --compile --target=bun-darwin-arm64 --outfile dist/namecheap-darwin-arm64",
     "build:binary:windows": "bun build src/index.ts --compile --target=bun-windows-x64 --outfile dist/namecheap-windows-x64.exe",
-    "build:all": "bun run build:binary:linux && bun run build:binary:linux-arm && bun run build:binary:macos && bun run build:binary:macos-arm && bun run build:binary:windows"
+    "build:all": "bun run build:binary:linux && bun run build:binary:linux-arm && bun run build:binary:macos && bun run build:binary:macos-arm && bun run build:binary:windows",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.2.0",
