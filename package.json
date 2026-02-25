@@ -24,19 +24,21 @@
     "url": "https://github.com/helgesverre"
   },
   "type": "module",
-  "main": "dist/index.js",
   "bin": {
     "namecheap": "dist/index.js"
   },
   "files": [
     "dist/index.js",
-    "scripts",
+    "scripts/postinstall.js",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "prepublishOnly": "bun run build",
+    "prepack": "bun run build",
     "postinstall": "node scripts/postinstall.js || true",
     "build": "bun build src/index.ts --outdir dist --target node",
     "check": "bun run typecheck && bun run lint && bun run format:check",
