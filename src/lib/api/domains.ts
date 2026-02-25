@@ -59,7 +59,10 @@ export async function listDomains(
 
   const response = await client.request('namecheap.domains.getList', params);
   const data = NamecheapClient.handleResponse(response);
-  const rawDomains = parseDomainList(data) as RawDomain[];
+  const { domains: rawDomains, totalItems } = parseDomainList(data) as {
+    domains: RawDomain[];
+    totalItems: number;
+  };
 
   const domains: Domain[] = rawDomains.map((d) => ({
     id: d['@_ID'],
@@ -75,10 +78,7 @@ export async function listDomains(
     isOurDns: d['@_IsOurDNS'],
   }));
 
-  // Extract total from response if available
-  const total = domains.length;
-
-  return { domains, total };
+  return { domains, total: totalItems };
 }
 
 export async function getDomainInfo(client: NamecheapClient, domain: string): Promise<DomainInfo> {

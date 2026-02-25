@@ -44,7 +44,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --fix",
-    "lint:chek": "eslint . ",
+    "lint:check": "eslint . ",
     "sort": "bunx sort-package-json",
     "start": "node dist/index.js",
     "test": "echo  'Run tests via bun test, instead of bun run test' && exit 1",

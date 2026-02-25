@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import { listCommand } from '../../src/commands/dns/list.js';
 import { addCommand } from '../../src/commands/dns/add.js';
 import { rmCommand } from '../../src/commands/dns/rm.js';
+import { setCommand } from '../../src/commands/dns/set.js';
 import { emailCommand } from '../../src/commands/dns/email.js';
 import * as client from '../../src/lib/api/client.js';
 import * as dnsApi from '../../src/lib/api/dns.js';
@@ -472,5 +473,112 @@ describe('dns email rm command', () => {
 
     expect(removeSpy).toHaveBeenCalledWith(expect.anything(), 'example.com', 'info');
     expect(logs.some((l) => l.includes('Email forward removed'))).toBe(true);
+  });
+});
+
+describe('dns set command', () => {
+  test('updates record value', async () => {
+    trackSpy(
+      spyOn(dnsApi, 'getDnsHosts').mockResolvedValue([
+        { hostId: '123', type: 'A', name: '@', address: '1.2.3.4', ttl: 1800, isActive: true },
+      ]),
+    );
+
+    const updateSpy = trackSpy(spyOn(dnsApi, 'updateDnsRecord').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(setCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'set',
+      'example.com',
+      '123',
+      '--value',
+      '5.6.7.8',
+    ]);
+
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      'example.com',
+      '123',
+      expect.objectContaining({ address: '5.6.7.8' }),
+    );
+    expect(logs.some((l) => l.includes('Updated record 123'))).toBe(true);
+  });
+
+  test('updates record TTL', async () => {
+    trackSpy(
+      spyOn(dnsApi, 'getDnsHosts').mockResolvedValue([
+        { hostId: '123', type: 'A', name: '@', address: '1.2.3.4', ttl: 1800, isActive: true },
+      ]),
+    );
+
+    const updateSpy = trackSpy(spyOn(dnsApi, 'updateDnsRecord').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(setCommand);
+    await program.parseAsync(['node', 'test', 'set', 'example.com', '123', '--ttl', '3600']);
+
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      'example.com',
+      '123',
+      expect.objectContaining({ ttl: 3600 }),
+    );
+    expect(logs.some((l) => l.includes('Updated record 123'))).toBe(true);
+  });
+
+  test('errors when no update options provided', async () => {
+    const program = new Command();
+    program.addCommand(setCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'set', 'example.com', '123']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('errors when record ID not found', async () => {
+    trackSpy(
+      spyOn(dnsApi, 'getDnsHosts').mockResolvedValue([
+        { hostId: '999', type: 'A', name: '@', address: '1.2.3.4', ttl: 1800, isActive: true },
+      ]),
+    );
+
+    const program = new Command();
+    program.addCommand(setCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'set',
+        'example.com',
+        '123',
+        '--value',
+        '5.6.7.8',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('validates domain argument', async () => {
+    const program = new Command();
+    program.addCommand(setCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'set', 'invalid', '123', '--value', '5.6.7.8']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
   });
 });

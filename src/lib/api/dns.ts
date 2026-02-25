@@ -264,7 +264,7 @@ export async function setEmailForwarding(
     params[`ForwardTo${i}`] = forward.forwardTo;
   });
 
-  const response = await client.request('namecheap.domains.dns.setEmailForwarding', params);
+  const response = await client.post('namecheap.domains.dns.setEmailForwarding', params);
   NamecheapClient.handleResponse(response);
   return true;
 }

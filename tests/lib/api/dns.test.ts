@@ -565,11 +565,13 @@ describe('setEmailForwarding', () => {
     ]);
 
     expect(result).toBe(true);
-    const calls = fetchMock.mock.calls as unknown as [string][];
-    const url = calls[0]?.[0] ?? '';
-    expect(url).toContain('MailBox1=info');
-    expect(url).toContain('ForwardTo1=admin%40example.com');
-    expect(url).toContain('MailBox2=support');
+    const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    const opts = calls[0]?.[1];
+    expect(opts?.method).toBe('POST');
+    const body = opts?.body as string;
+    expect(body).toContain('MailBox1=info');
+    expect(body).toContain('ForwardTo1=admin%40example.com');
+    expect(body).toContain('MailBox2=support');
   });
 });
 

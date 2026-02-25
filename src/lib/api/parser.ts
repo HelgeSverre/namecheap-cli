@@ -63,16 +63,23 @@ function parseWarnings(warnings?: { Warning?: string | string[] }): string[] {
 }
 
 // Domain-specific parsers
-export function parseDomainList(data: unknown): unknown[] {
+export function parseDomainList(data: unknown): { domains: unknown[]; totalItems: number } {
   const commandResponse = data as {
     DomainGetListResult?: {
       Domain?: unknown | unknown[];
     };
+    Paging?: {
+      TotalItems?: number;
+      CurrentPage?: number;
+      PageSize?: number;
+    };
   };
 
   const domains = commandResponse?.DomainGetListResult?.Domain;
-  if (!domains) return [];
-  return Array.isArray(domains) ? domains : [domains];
+  const domainList = !domains ? [] : Array.isArray(domains) ? domains : [domains];
+  const totalItems = commandResponse?.Paging?.TotalItems ?? domainList.length;
+
+  return { domains: domainList, totalItems };
 }
 
 export function parseDomainInfo(data: unknown): unknown {

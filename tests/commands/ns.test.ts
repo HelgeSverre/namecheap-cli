@@ -3,8 +3,13 @@ import { Command } from 'commander';
 import { listCommand } from '../../src/commands/ns/list.js';
 import { setCommand } from '../../src/commands/ns/set.js';
 import { resetCommand } from '../../src/commands/ns/reset.js';
+import { createCommand } from '../../src/commands/ns/create.js';
+import { deleteCommand } from '../../src/commands/ns/delete.js';
+import { infoCommand } from '../../src/commands/ns/info.js';
+import { updateCommand } from '../../src/commands/ns/update.js';
 import * as client from '../../src/lib/api/client.js';
 import * as dnsApi from '../../src/lib/api/dns.js';
+import * as nsApi from '../../src/lib/api/ns.js';
 import * as spinner from '../../src/utils/spinner.js';
 import * as prompts from '../../src/utils/prompts.js';
 
@@ -271,5 +276,242 @@ describe('ns reset command', () => {
     // When cancelled, no success message should be shown
     expect(logs.some((l) => l.includes('Reset nameservers'))).toBe(false);
     expect(warns.some((w) => w.includes('cancelled'))).toBe(true);
+  });
+});
+
+describe('ns create command', () => {
+  test('creates child nameserver', async () => {
+    const createSpy = trackSpy(
+      spyOn(nsApi, 'createChildNameserver').mockResolvedValue(true),
+    );
+
+    const program = new Command();
+    program.addCommand(createCommand);
+    await program.parseAsync(['node', 'test', 'create', 'example.com', 'ns1.example.com', '1.2.3.4']);
+
+    expect(createSpy).toHaveBeenCalledWith(expect.anything(), 'example.com', 'ns1.example.com', '1.2.3.4');
+    expect(logs.some((l) => l.includes('ns1.example.com') && l.includes('1.2.3.4'))).toBe(true);
+  });
+
+  test('validates domain argument', async () => {
+    const program = new Command();
+    program.addCommand(createCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'create', 'invalid', 'ns1.invalid', '1.2.3.4']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('validates IP address', async () => {
+    const program = new Command();
+    program.addCommand(createCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'create', 'example.com', 'ns1.example.com', 'notanip']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(spyOn(nsApi, 'createChildNameserver').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(createCommand);
+    await program.parseAsync(['node', 'test', 'create', 'example.com', 'ns1.example.com', '1.2.3.4', '--json']);
+
+    const jsonOutput = logs.find((l) => l.includes('"created"'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.created).toBe(true);
+    expect(parsed.nameserver).toBe('ns1.example.com');
+    expect(parsed.ip).toBe('1.2.3.4');
+  });
+
+  test('shows warning for nameserver not under domain', async () => {
+    trackSpy(spyOn(nsApi, 'createChildNameserver').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(createCommand);
+    await program.parseAsync(['node', 'test', 'create', 'example.com', 'ns1.other.com', '1.2.3.4']);
+
+    expect(logs.some((l) => l.includes('Warning') && l.includes('ns1.other.com'))).toBe(true);
+  });
+});
+
+describe('ns delete command', () => {
+  test('deletes child nameserver with --yes', async () => {
+    const deleteSpy = trackSpy(
+      spyOn(nsApi, 'deleteChildNameserver').mockResolvedValue(true),
+    );
+
+    const program = new Command();
+    program.addCommand(deleteCommand);
+    await program.parseAsync(['node', 'test', 'delete', 'example.com', 'ns1.example.com', '--yes']);
+
+    expect(deleteSpy).toHaveBeenCalledWith(expect.anything(), 'example.com', 'ns1.example.com');
+    expect(logs.some((l) => l.includes('ns1.example.com'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(spyOn(nsApi, 'deleteChildNameserver').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(deleteCommand);
+    await program.parseAsync(['node', 'test', 'delete', 'example.com', 'ns1.example.com', '--yes', '--json']);
+
+    const jsonOutput = logs.find((l) => l.includes('"deleted"'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.deleted).toBe(true);
+    expect(parsed.nameserver).toBe('ns1.example.com');
+  });
+
+  test('validates domain argument', async () => {
+    const program = new Command();
+    program.addCommand(deleteCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'delete', 'invalid', 'ns1.invalid', '--yes']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+});
+
+describe('ns info command', () => {
+  test('displays nameserver info', async () => {
+    trackSpy(
+      spyOn(nsApi, 'getChildNameserverInfo').mockResolvedValue({
+        nameserver: 'ns1.example.com',
+        ip: '1.2.3.4',
+        statuses: ['ok'],
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(infoCommand);
+    await program.parseAsync(['node', 'test', 'info', 'example.com', 'ns1.example.com']);
+
+    expect(logs.some((l) => l.includes('ns1.example.com'))).toBe(true);
+    expect(logs.some((l) => l.includes('1.2.3.4'))).toBe(true);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(nsApi, 'getChildNameserverInfo').mockResolvedValue({
+        nameserver: 'ns1.example.com',
+        ip: '1.2.3.4',
+        statuses: ['ok'],
+      }),
+    );
+
+    const program = new Command();
+    program.addCommand(infoCommand);
+    await program.parseAsync(['node', 'test', 'info', 'example.com', 'ns1.example.com', '--json']);
+
+    const jsonOutput = logs.find((l) => l.includes('"nameserver"'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.nameserver).toBe('ns1.example.com');
+    expect(parsed.ip).toBe('1.2.3.4');
+  });
+
+  test('validates domain argument', async () => {
+    const program = new Command();
+    program.addCommand(infoCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'info', 'invalid', 'ns1.invalid']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+});
+
+describe('ns update command', () => {
+  test('updates nameserver IP', async () => {
+    trackSpy(
+      spyOn(nsApi, 'getChildNameserverInfo').mockResolvedValue({
+        nameserver: 'ns1.example.com',
+        ip: '1.2.3.4',
+        statuses: ['ok'],
+      }),
+    );
+    const updateSpy = trackSpy(
+      spyOn(nsApi, 'updateChildNameserver').mockResolvedValue(true),
+    );
+
+    const program = new Command();
+    program.addCommand(updateCommand);
+    await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', '5.6.7.8']);
+
+    expect(updateSpy).toHaveBeenCalledWith(expect.anything(), 'example.com', 'ns1.example.com', '1.2.3.4', '5.6.7.8');
+    expect(logs.some((l) => l.includes('5.6.7.8'))).toBe(true);
+  });
+
+  test('skips update when IP already matches', async () => {
+    trackSpy(
+      spyOn(nsApi, 'getChildNameserverInfo').mockResolvedValue({
+        nameserver: 'ns1.example.com',
+        ip: '1.2.3.4',
+        statuses: ['ok'],
+      }),
+    );
+    const updateSpy = trackSpy(
+      spyOn(nsApi, 'updateChildNameserver').mockResolvedValue(true),
+    );
+
+    const program = new Command();
+    program.addCommand(updateCommand);
+    await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', '1.2.3.4']);
+
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(logs.some((l) => l.includes('already set'))).toBe(true);
+  });
+
+  test('validates IP address', async () => {
+    const program = new Command();
+    program.addCommand(updateCommand);
+
+    try {
+      await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', 'notanip']);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+  });
+
+  test('outputs JSON with --json flag', async () => {
+    trackSpy(
+      spyOn(nsApi, 'getChildNameserverInfo').mockResolvedValue({
+        nameserver: 'ns1.example.com',
+        ip: '1.2.3.4',
+        statuses: ['ok'],
+      }),
+    );
+    trackSpy(spyOn(nsApi, 'updateChildNameserver').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(updateCommand);
+    await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', '5.6.7.8', '--json']);
+
+    const jsonOutput = logs.find((l) => l.includes('"updated"'));
+    expect(jsonOutput).toBeDefined();
+    const parsed = JSON.parse(jsonOutput!);
+    expect(parsed.updated).toBe(true);
+    expect(parsed.oldIp).toBe('1.2.3.4');
+    expect(parsed.newIp).toBe('5.6.7.8');
   });
 });

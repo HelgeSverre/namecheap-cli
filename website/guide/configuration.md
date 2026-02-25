@@ -16,7 +16,7 @@ namecheap config path              # Show the config file path
 | Option | Values | Description |
 |---|---|---|
 | `sandbox` | `true` / `false` | Use the sandbox API for testing |
-| `output` | `table` / `json` | Default output format |
+| `defaultOutput` | `table` / `json` | Default output format |
 
 ## Output Formats
 
@@ -41,7 +41,7 @@ namecheap domains list --json
 If you prefer JSON output by default, set it in the config:
 
 ```bash
-namecheap config set output json
+namecheap config set defaultOutput json
 ```
 
 You can still override the default with the `--json` flag on individual commands.

@@ -12,7 +12,8 @@ const tabs = [
 ]
 
 function copyInstall() {
-  navigator.clipboard.writeText('npm install -g namecheap-cli')
+  const tab = tabs.find((t) => t.id === activeTab.value)
+  navigator.clipboard.writeText(tab ? tab.command : 'npm install -g namecheap-cli')
   copied.value = true
   setTimeout(() => {
     copied.value = false

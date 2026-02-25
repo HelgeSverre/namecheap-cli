@@ -85,11 +85,11 @@ describe('parseDomainList', () => {
   test('parses multiple domains', () => {
     const xml = loadFixture('domain-list.xml');
     const response = parseApiResponse(xml);
-    const domains = parseDomainList(response.data);
+    const result = parseDomainList(response.data);
 
-    expect(domains.length).toBe(2);
-    expect((domains[0] as any)['@_Name']).toBe('example.com');
-    expect((domains[1] as any)['@_Name']).toBe('test-domain.org');
+    expect(result.domains.length).toBe(2);
+    expect((result.domains[0] as any)['@_Name']).toBe('example.com');
+    expect((result.domains[1] as any)['@_Name']).toBe('test-domain.org');
   });
 
   test('parses single domain', () => {
@@ -98,24 +98,55 @@ describe('parseDomainList', () => {
         Domain: { '@_ID': 1, '@_Name': 'single.com' },
       },
     };
-    const domains = parseDomainList(data);
+    const result = parseDomainList(data);
 
-    expect(domains.length).toBe(1);
-    expect((domains[0] as any)['@_Name']).toBe('single.com');
+    expect(result.domains.length).toBe(1);
+    expect((result.domains[0] as any)['@_Name']).toBe('single.com');
   });
 
   test('returns empty array for no domains', () => {
     const data = {
       DomainGetListResult: {},
     };
-    const domains = parseDomainList(data);
+    const result = parseDomainList(data);
 
-    expect(domains).toEqual([]);
+    expect(result.domains).toEqual([]);
   });
 
   test('returns empty array for undefined data', () => {
-    const domains = parseDomainList(undefined);
-    expect(domains).toEqual([]);
+    const result = parseDomainList(undefined);
+    expect(result.domains).toEqual([]);
+  });
+
+  test('parses totalItems from Paging', () => {
+    const data = {
+      DomainGetListResult: {
+        Domain: { '@_ID': 1, '@_Name': 'single.com' },
+      },
+      Paging: {
+        TotalItems: 50,
+        CurrentPage: 1,
+        PageSize: 20,
+      },
+    };
+    const result = parseDomainList(data);
+
+    expect(result.totalItems).toBe(50);
+    expect(result.domains.length).toBe(1);
+  });
+
+  test('falls back to domains length when no Paging', () => {
+    const data = {
+      DomainGetListResult: {
+        Domain: [
+          { '@_ID': 1, '@_Name': 'a.com' },
+          { '@_ID': 2, '@_Name': 'b.com' },
+        ],
+      },
+    };
+    const result = parseDomainList(data);
+
+    expect(result.totalItems).toBe(2);
   });
 });
 
