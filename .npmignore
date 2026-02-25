@@ -61,6 +61,9 @@ pnpm-lock.yaml
 .turbo/
 .cache/
 
+# Website
+website/
+
 # OS files
 .DS_Store
 Thumbs.db

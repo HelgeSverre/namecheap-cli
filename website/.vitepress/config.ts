@@ -11,32 +11,29 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Commands', link: '/commands/domains' },
     ],
-    sidebar: {
-      '/guide/': [
-        {
-          text: 'Guide',
-          items: [
-            { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Configuration', link: '/guide/configuration' },
-            { text: 'Shell Completions', link: '/guide/shell-completions' },
-          ],
-        },
-      ],
-      '/commands/': [
-        {
-          text: 'Commands',
-          items: [
-            { text: 'Domains', link: '/commands/domains' },
-            { text: 'DNS', link: '/commands/dns' },
-            { text: 'Nameservers', link: '/commands/ns' },
-            { text: 'Auth', link: '/commands/auth' },
-            { text: 'Users', link: '/commands/users' },
-            { text: 'WhoisGuard', link: '/commands/whoisguard' },
-            { text: 'Config', link: '/commands/config' },
-          ],
-        },
-      ],
-    },
+    sidebar: [
+      {
+        text: 'Guide',
+        items: [
+          { text: 'Getting Started', link: '/guide/getting-started' },
+          { text: 'Configuration', link: '/guide/configuration' },
+          { text: 'Shell Completions', link: '/guide/shell-completions' },
+        ],
+      },
+      {
+        text: 'Commands',
+        items: [
+          { text: 'Auth', link: '/commands/auth' },
+          { text: 'Domains', link: '/commands/domains' },
+          { text: 'DNS', link: '/commands/dns' },
+          { text: 'Nameservers', link: '/commands/ns' },
+          { text: 'Users', link: '/commands/users' },
+          { text: 'WhoisGuard', link: '/commands/whoisguard' },
+          { text: 'Address', link: '/commands/address' },
+          { text: 'Config', link: '/commands/config' },
+        ],
+      },
+    ],
     socialLinks: [
       { icon: 'github', link: 'https://github.com/HelgeSverre/namecheap-cli' },
     ],
