@@ -24,7 +24,7 @@
     "url": "https://github.com/helgesverre"
   },
   "type": "module",
-  "module": "src/index.ts",
+  "main": "dist/index.js",
   "bin": {
     "namecheap": "./dist/index.js"
   },
@@ -36,6 +36,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "prepublishOnly": "bun run build",
     "postinstall": "node scripts/postinstall.js || true",
     "build": "bun build src/index.ts --outdir dist --target node",
     "check": "bun run typecheck && bun run lint && bun run format:check",
