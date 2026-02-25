@@ -287,7 +287,7 @@ describe('domains info command', () => {
 describe('domains lock command', () => {
   test('locks an unlocked domain', async () => {
     trackSpy(spyOn(domainsApi, 'getRegistrarLock').mockResolvedValue(false));
-    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(undefined));
+    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(lockCommand);
@@ -299,7 +299,7 @@ describe('domains lock command', () => {
 
   test('shows info when domain already locked', async () => {
     trackSpy(spyOn(domainsApi, 'getRegistrarLock').mockResolvedValue(true));
-    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(undefined));
+    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(lockCommand);
@@ -326,7 +326,7 @@ describe('domains lock command', () => {
 describe('domains unlock command', () => {
   test('unlocks a locked domain', async () => {
     trackSpy(spyOn(domainsApi, 'getRegistrarLock').mockResolvedValue(true));
-    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(undefined));
+    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(unlockCommand);
@@ -338,7 +338,7 @@ describe('domains unlock command', () => {
 
   test('shows info when domain already unlocked', async () => {
     trackSpy(spyOn(domainsApi, 'getRegistrarLock').mockResolvedValue(false));
-    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(undefined));
+    const setLockSpy = trackSpy(spyOn(domainsApi, 'setRegistrarLock').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(unlockCommand);
@@ -500,9 +500,7 @@ describe('domains reactivate command', () => {
   });
 
   test('outputs JSON with --json flag', async () => {
-    trackSpy(
-      spyOn(domainsApi, 'reactivateDomain').mockResolvedValue(mockReactivateResult),
-    );
+    trackSpy(spyOn(domainsApi, 'reactivateDomain').mockResolvedValue(mockReactivateResult));
 
     const program = new Command();
     program.addCommand(reactivateCommand);

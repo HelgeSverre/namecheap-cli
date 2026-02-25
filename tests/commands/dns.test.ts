@@ -488,15 +488,7 @@ describe('dns set command', () => {
 
     const program = new Command();
     program.addCommand(setCommand);
-    await program.parseAsync([
-      'node',
-      'test',
-      'set',
-      'example.com',
-      '123',
-      '--value',
-      '5.6.7.8',
-    ]);
+    await program.parseAsync(['node', 'test', 'set', 'example.com', '123', '--value', '5.6.7.8']);
 
     expect(updateSpy).toHaveBeenCalledWith(
       expect.anything(),
@@ -553,15 +545,7 @@ describe('dns set command', () => {
     program.addCommand(setCommand);
 
     try {
-      await program.parseAsync([
-        'node',
-        'test',
-        'set',
-        'example.com',
-        '123',
-        '--value',
-        '5.6.7.8',
-      ]);
+      await program.parseAsync(['node', 'test', 'set', 'example.com', '123', '--value', '5.6.7.8']);
     } catch (_e) {
       // Expected
     }

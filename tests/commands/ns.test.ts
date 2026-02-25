@@ -281,15 +281,25 @@ describe('ns reset command', () => {
 
 describe('ns create command', () => {
   test('creates child nameserver', async () => {
-    const createSpy = trackSpy(
-      spyOn(nsApi, 'createChildNameserver').mockResolvedValue(true),
-    );
+    const createSpy = trackSpy(spyOn(nsApi, 'createChildNameserver').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(createCommand);
-    await program.parseAsync(['node', 'test', 'create', 'example.com', 'ns1.example.com', '1.2.3.4']);
+    await program.parseAsync([
+      'node',
+      'test',
+      'create',
+      'example.com',
+      'ns1.example.com',
+      '1.2.3.4',
+    ]);
 
-    expect(createSpy).toHaveBeenCalledWith(expect.anything(), 'example.com', 'ns1.example.com', '1.2.3.4');
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      'example.com',
+      'ns1.example.com',
+      '1.2.3.4',
+    );
     expect(logs.some((l) => l.includes('ns1.example.com') && l.includes('1.2.3.4'))).toBe(true);
   });
 
@@ -311,7 +321,14 @@ describe('ns create command', () => {
     program.addCommand(createCommand);
 
     try {
-      await program.parseAsync(['node', 'test', 'create', 'example.com', 'ns1.example.com', 'notanip']);
+      await program.parseAsync([
+        'node',
+        'test',
+        'create',
+        'example.com',
+        'ns1.example.com',
+        'notanip',
+      ]);
     } catch (_e) {
       // Expected
     }
@@ -324,7 +341,15 @@ describe('ns create command', () => {
 
     const program = new Command();
     program.addCommand(createCommand);
-    await program.parseAsync(['node', 'test', 'create', 'example.com', 'ns1.example.com', '1.2.3.4', '--json']);
+    await program.parseAsync([
+      'node',
+      'test',
+      'create',
+      'example.com',
+      'ns1.example.com',
+      '1.2.3.4',
+      '--json',
+    ]);
 
     const jsonOutput = logs.find((l) => l.includes('"created"'));
     expect(jsonOutput).toBeDefined();
@@ -347,9 +372,7 @@ describe('ns create command', () => {
 
 describe('ns delete command', () => {
   test('deletes child nameserver with --yes', async () => {
-    const deleteSpy = trackSpy(
-      spyOn(nsApi, 'deleteChildNameserver').mockResolvedValue(true),
-    );
+    const deleteSpy = trackSpy(spyOn(nsApi, 'deleteChildNameserver').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(deleteCommand);
@@ -364,7 +387,15 @@ describe('ns delete command', () => {
 
     const program = new Command();
     program.addCommand(deleteCommand);
-    await program.parseAsync(['node', 'test', 'delete', 'example.com', 'ns1.example.com', '--yes', '--json']);
+    await program.parseAsync([
+      'node',
+      'test',
+      'delete',
+      'example.com',
+      'ns1.example.com',
+      '--yes',
+      '--json',
+    ]);
 
     const jsonOutput = logs.find((l) => l.includes('"deleted"'));
     expect(jsonOutput).toBeDefined();
@@ -448,15 +479,26 @@ describe('ns update command', () => {
         statuses: ['ok'],
       }),
     );
-    const updateSpy = trackSpy(
-      spyOn(nsApi, 'updateChildNameserver').mockResolvedValue(true),
-    );
+    const updateSpy = trackSpy(spyOn(nsApi, 'updateChildNameserver').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(updateCommand);
-    await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', '5.6.7.8']);
+    await program.parseAsync([
+      'node',
+      'test',
+      'update',
+      'example.com',
+      'ns1.example.com',
+      '5.6.7.8',
+    ]);
 
-    expect(updateSpy).toHaveBeenCalledWith(expect.anything(), 'example.com', 'ns1.example.com', '1.2.3.4', '5.6.7.8');
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      'example.com',
+      'ns1.example.com',
+      '1.2.3.4',
+      '5.6.7.8',
+    );
     expect(logs.some((l) => l.includes('5.6.7.8'))).toBe(true);
   });
 
@@ -468,13 +510,18 @@ describe('ns update command', () => {
         statuses: ['ok'],
       }),
     );
-    const updateSpy = trackSpy(
-      spyOn(nsApi, 'updateChildNameserver').mockResolvedValue(true),
-    );
+    const updateSpy = trackSpy(spyOn(nsApi, 'updateChildNameserver').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(updateCommand);
-    await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', '1.2.3.4']);
+    await program.parseAsync([
+      'node',
+      'test',
+      'update',
+      'example.com',
+      'ns1.example.com',
+      '1.2.3.4',
+    ]);
 
     expect(updateSpy).not.toHaveBeenCalled();
     expect(logs.some((l) => l.includes('already set'))).toBe(true);
@@ -485,7 +532,14 @@ describe('ns update command', () => {
     program.addCommand(updateCommand);
 
     try {
-      await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', 'notanip']);
+      await program.parseAsync([
+        'node',
+        'test',
+        'update',
+        'example.com',
+        'ns1.example.com',
+        'notanip',
+      ]);
     } catch (_e) {
       // Expected
     }
@@ -505,7 +559,15 @@ describe('ns update command', () => {
 
     const program = new Command();
     program.addCommand(updateCommand);
-    await program.parseAsync(['node', 'test', 'update', 'example.com', 'ns1.example.com', '5.6.7.8', '--json']);
+    await program.parseAsync([
+      'node',
+      'test',
+      'update',
+      'example.com',
+      'ns1.example.com',
+      '5.6.7.8',
+      '--json',
+    ]);
 
     const jsonOutput = logs.find((l) => l.includes('"updated"'));
     expect(jsonOutput).toBeDefined();

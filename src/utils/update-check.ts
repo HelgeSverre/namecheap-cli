@@ -22,7 +22,6 @@ export function checkForUpdates(): void {
 
   notifier.notify({
     isGlobal: true,
-    message:
-      'Update available: {currentVersion} → {latestVersion}\nRun `npm i -g ncli` to update',
+    message: 'Update available: {currentVersion} → {latestVersion}\nRun `npm i -g ncli` to update',
   });
 }
