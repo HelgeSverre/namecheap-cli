@@ -5,15 +5,15 @@ const copied = ref(false)
 const activeTab = ref('npm')
 
 const tabs = [
-  { id: 'npm', label: 'npm', command: 'npm install -g namecheap-cli' },
-  { id: 'pnpm', label: 'pnpm', command: 'pnpm add -g namecheap-cli' },
-  { id: 'yarn', label: 'yarn', command: 'yarn global add namecheap-cli' },
-  { id: 'bun', label: 'bun', command: 'bun add -g namecheap-cli' },
+  { id: 'npm', label: 'npm', command: 'npm install -g ncli' },
+  { id: 'pnpm', label: 'pnpm', command: 'pnpm add -g ncli' },
+  { id: 'yarn', label: 'yarn', command: 'yarn global add ncli' },
+  { id: 'bun', label: 'bun', command: 'bun add -g ncli' },
 ]
 
 function copyInstall() {
   const tab = tabs.find((t) => t.id === activeTab.value)
-  navigator.clipboard.writeText(tab ? tab.command : 'npm install -g namecheap-cli')
+  navigator.clipboard.writeText(tab ? tab.command : 'npm install -g ncli')
   copied.value = true
   setTimeout(() => {
     copied.value = false
@@ -77,7 +77,7 @@ const features = [
         with TypeScript.
       </p>
       <div class="hero-install" @click="copyInstall">
-        <code>npm install -g namecheap-cli</code>
+        <code>npm install -g ncli</code>
         <span class="copy-icon">{{ copied ? '✓' : '📋' }}</span>
       </div>
       <div class="hero-actions">
@@ -161,7 +161,7 @@ const features = [
         <span class="copy-icon">{{ copied ? '✓' : '📋' }}</span>
       </div>
       <p class="install-alt">
-        Or run without installing: <code>npx namecheap-cli domains list</code>
+        Or run without installing: <code>npx ncli domains list</code>
       </p>
     </div>
   </section>
@@ -170,11 +170,11 @@ const features = [
   <section class="cta-section">
     <div class="section-container">
       <h2 class="cta-heading">Ready to get started?</h2>
-      <p class="cta-subheading">Install namecheap-cli and manage your domains in seconds.</p>
+      <p class="cta-subheading">Install ncli and manage your domains in seconds.</p>
       <div class="cta-actions">
         <a href="/guide/getting-started" class="btn btn-primary">Read the Docs</a>
         <a
-          href="https://www.npmjs.com/package/namecheap-cli"
+          href="https://www.npmjs.com/package/ncli"
           target="_blank"
           rel="noopener noreferrer"
           class="btn btn-secondary"

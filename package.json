@@ -1,5 +1,5 @@
 {
-  "name": "namecheap-cli",
+  "name": "ncli",
   "version": "0.1.0",
   "description": "Command-line interface for managing Namecheap domains, DNS records, nameservers, and WhoisGuard privacy",
   "keywords": [
