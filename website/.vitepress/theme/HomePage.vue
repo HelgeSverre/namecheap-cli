@@ -1,33 +1,33 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const copied = ref(false)
-const activeTab = ref('npm')
+const copied = ref(false);
+const activeTab = ref('npm');
 
 const tabs = [
   { id: 'npm', label: 'npm', command: 'npm install -g ncli' },
   { id: 'pnpm', label: 'pnpm', command: 'pnpm add -g ncli' },
   { id: 'yarn', label: 'yarn', command: 'yarn global add ncli' },
   { id: 'bun', label: 'bun', command: 'bun add -g ncli' },
-]
+];
 
 function copyInstall() {
-  const tab = tabs.find((t) => t.id === activeTab.value)
-  navigator.clipboard.writeText(tab ? tab.command : 'npm install -g ncli')
-  copied.value = true
+  const tab = tabs.find((t) => t.id === activeTab.value);
+  navigator.clipboard.writeText(tab ? tab.command : 'npm install -g ncli');
+  copied.value = true;
   setTimeout(() => {
-    copied.value = false
-  }, 2000)
+    copied.value = false;
+  }, 2000);
 }
 
 function copyTabCommand() {
-  const tab = tabs.find((t) => t.id === activeTab.value)
+  const tab = tabs.find((t) => t.id === activeTab.value);
   if (tab) {
-    navigator.clipboard.writeText(tab.command)
-    copied.value = true
+    navigator.clipboard.writeText(tab.command);
+    copied.value = true;
     setTimeout(() => {
-      copied.value = false
-    }, 2000)
+      copied.value = false;
+    }, 2000);
   }
 }
 
@@ -62,7 +62,7 @@ const features = [
     title: 'Sandbox Mode',
     description: 'Test safely with the Namecheap sandbox API.',
   },
-]
+];
 </script>
 
 <template>
@@ -160,9 +160,7 @@ const features = [
         <code>{{ tabs.find((t) => t.id === activeTab)?.command }}</code>
         <span class="copy-icon">{{ copied ? '✓' : '📋' }}</span>
       </div>
-      <p class="install-alt">
-        Or run without installing: <code>npx ncli domains list</code>
-      </p>
+      <p class="install-alt">Or run without installing: <code>npx ncli domains list</code></p>
     </div>
   </section>
 
@@ -252,7 +250,9 @@ const features = [
   padding: 12px 20px;
   margin-bottom: 2rem;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .hero-install:hover {
@@ -294,7 +294,10 @@ const features = [
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.1s;
 }
 
 .btn:active {

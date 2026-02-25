@@ -1,9 +1,9 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from 'vitepress';
 
-const siteUrl = 'https://namecheap-cli.vercel.app'
-const title = 'Namecheap CLI'
+const siteUrl = 'https://namecheap-cli.vercel.app';
+const title = 'Namecheap CLI';
 const description =
-  'A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, and WhoisGuard privacy. Built with TypeScript.'
+  'A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, and WhoisGuard privacy. Built with TypeScript.';
 
 export default defineConfig({
   title,
@@ -31,7 +31,13 @@ export default defineConfig({
     // Additional meta
     ['meta', { name: 'theme-color', content: '#FE5803' }],
     ['meta', { name: 'author', content: 'Helge Sverre' }],
-    ['meta', { name: 'keywords', content: 'namecheap, cli, dns, domain, nameserver, whoisguard, command-line, terminal' }],
+    [
+      'meta',
+      {
+        name: 'keywords',
+        content: 'namecheap, cli, dns, domain, nameserver, whoisguard, command-line, terminal',
+      },
+    ],
   ],
   themeConfig: {
     nav: [
@@ -61,9 +67,7 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/HelgeSverre/namecheap-cli' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/HelgeSverre/namecheap-cli' }],
     footer: {
       message: 'Released under the MIT License.',
       copyright: 'Copyright © Helge Sverre',
@@ -72,4 +76,4 @@ export default defineConfig({
       provider: 'local',
     },
   },
-})
+});
