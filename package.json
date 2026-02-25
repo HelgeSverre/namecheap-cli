@@ -29,7 +29,7 @@
     "namecheap": "dist/index.js"
   },
   "files": [
-    "dist",
+    "dist/index.js",
     "scripts",
     "README.md",
     "CHANGELOG.md",
