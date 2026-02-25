@@ -160,7 +160,9 @@ const features = [
         <code>{{ tabs.find((t) => t.id === activeTab)?.command }}</code>
         <span class="copy-icon">{{ copied ? '✓' : '📋' }}</span>
       </div>
-      <p class="install-alt">Or run without installing: <code>npx @helgesverre/namecheap-cli domains list</code></p>
+      <p class="install-alt">
+        Or run without installing: <code>npx @helgesverre/namecheap-cli domains list</code>
+      </p>
     </div>
   </section>
 
