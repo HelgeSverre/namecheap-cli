@@ -1,10 +1,37 @@
 import { defineConfig } from 'vitepress'
 
+const siteUrl = 'https://namecheap-cli.vercel.app'
+const title = 'Namecheap CLI'
+const description =
+  'A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, and WhoisGuard privacy. Built with TypeScript.'
+
 export default defineConfig({
-  title: 'Namecheap CLI',
-  description: 'Manage Namecheap domains, DNS records, and more from your terminal',
+  title,
+  description,
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    // Favicon
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
+
+    // Open Graph
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:title', content: title }],
+    ['meta', { property: 'og:description', content: description }],
+    ['meta', { property: 'og:image', content: `${siteUrl}/og-image.png` }],
+    ['meta', { property: 'og:url', content: siteUrl }],
+    ['meta', { property: 'og:site_name', content: title }],
+
+    // Twitter Card
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:title', content: title }],
+    ['meta', { name: 'twitter:description', content: description }],
+    ['meta', { name: 'twitter:image', content: `${siteUrl}/og-image.png` }],
+
+    // Additional meta
+    ['meta', { name: 'theme-color', content: '#FE5803' }],
+    ['meta', { name: 'author', content: 'Helge Sverre' }],
+    ['meta', { name: 'keywords', content: 'namecheap, cli, dns, domain, nameserver, whoisguard, command-line, terminal' }],
   ],
   themeConfig: {
     nav: [
