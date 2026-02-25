@@ -2,11 +2,11 @@
 
 ## A cli for managing Namecheap domains and DNS via the command line.
 
-[![npm version](https://img.shields.io/npm/v/@helgesverre/namecheap-cli?style=flat-square&color=FE5803&label=npm)](https://www.npmjs.com/package/@helgesverre/namecheap-cli)
-[![npm downloads](https://img.shields.io/npm/dm/@helgesverre/namecheap-cli?style=flat-square&color=FF8C44&label=downloads)](https://www.npmjs.com/package/@helgesverre/namecheap-cli)
-[![CI](https://img.shields.io/github/actions/workflow/status/HelgeSverre/namecheap-cli/ci.yml?style=flat-square&label=CI)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
-[![GitHub stars](https://img.shields.io/github/stars/HelgeSverre/namecheap-cli?style=flat-square&color=FE5803)](https://github.com/HelgeSverre/namecheap-cli)
-[![License](https://img.shields.io/badge/license-MIT-6E6F71?style=flat-square)](https://opensource.org/licenses/MIT)
+[![npm version](https://img.shields.io/npm/v/@helgesverre/namecheap-cli?style=flat-square&color=FE5803&label=npm&v=1772031221)](https://www.npmjs.com/package/@helgesverre/namecheap-cli)
+[![npm downloads](https://img.shields.io/npm/dm/@helgesverre/namecheap-cli?style=flat-square&color=FF8C44&label=downloads&v=1772031221)](https://www.npmjs.com/package/@helgesverre/namecheap-cli)
+[![CI](https://img.shields.io/github/actions/workflow/status/HelgeSverre/namecheap-cli/ci.yml?style=flat-square&label=CI&v=1772031221)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/HelgeSverre/namecheap-cli?style=flat-square&color=FE5803&v=1772031221)](https://github.com/HelgeSverre/namecheap-cli)
+[![License](https://img.shields.io/badge/license-MIT-6E6F71?style=flat-square&v=1772031221)](https://opensource.org/licenses/MIT)
 
 A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, WhoisGuard privacy
 protection, and more. Built with Bun and TypeScript.
