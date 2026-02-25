@@ -108,5 +108,7 @@ pids
 
 
 
-website/
+website/node_modules
+website/.vitepress/cache
+website/.vitepress/dist
 wip/
