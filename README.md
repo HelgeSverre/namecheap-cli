@@ -2,8 +2,8 @@
 
 ## A cli for managing Namecheap domains and DNS via the command line.
 
-[![npm version](https://img.shields.io/npm/v/ncli?style=flat-square&color=FE5803&label=npm)](https://www.npmjs.com/package/ncli)
-[![npm downloads](https://img.shields.io/npm/dm/ncli?style=flat-square&color=FF8C44&label=downloads)](https://www.npmjs.com/package/ncli)
+[![npm version](https://img.shields.io/npm/v/@helgesverre/namecheap-cli?style=flat-square&color=FE5803&label=npm)](https://www.npmjs.com/package/@helgesverre/namecheap-cli)
+[![npm downloads](https://img.shields.io/npm/dm/@helgesverre/namecheap-cli?style=flat-square&color=FF8C44&label=downloads)](https://www.npmjs.com/package/@helgesverre/namecheap-cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/HelgeSverre/namecheap-cli/ci.yml?style=flat-square&label=CI)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/HelgeSverre/namecheap-cli?style=flat-square&color=FE5803)](https://github.com/HelgeSverre/namecheap-cli)
 [![License](https://img.shields.io/badge/license-MIT-6E6F71?style=flat-square)](https://opensource.org/licenses/MIT)
@@ -17,26 +17,26 @@ protection, and more. Built with Bun and TypeScript.
 
 ```bash
 # Using npm
-npm install -g ncli
+npm install -g @helgesverre/namecheap-cli
 
 # Using Yarn
-yarn global add ncli
+yarn global add @helgesverre/namecheap-cli
 
 # Using pnpm
-pnpm add -g ncli
+pnpm add -g @helgesverre/namecheap-cli
 
 # Using Bun
-bun install -g ncli
+bun install -g @helgesverre/namecheap-cli
 ```
 
 ### Run Without Installing
 
 ```bash
 # Using npx
-npx ncli domains list
+npx @helgesverre/namecheap-cli domains list
 
 # Using bunx
-bunx ncli domains list
+bunx @helgesverre/namecheap-cli domains list
 ```
 
 ### Requirements

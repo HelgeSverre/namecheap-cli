@@ -10,16 +10,16 @@
 
 ```bash
 # Using npm
-npm install -g ncli
+npm install -g @helgesverre/namecheap-cli
 
 # Using pnpm
-pnpm add -g ncli
+pnpm add -g @helgesverre/namecheap-cli
 
 # Using Yarn
-yarn global add ncli
+yarn global add @helgesverre/namecheap-cli
 
 # Using Bun
-bun install -g ncli
+bun install -g @helgesverre/namecheap-cli
 ```
 
 ### Run Without Installing
@@ -28,10 +28,10 @@ You can try out the CLI without installing it globally:
 
 ```bash
 # Using npx
-npx ncli domains list
+npx @helgesverre/namecheap-cli domains list
 
 # Using bunx
-bunx ncli domains list
+bunx @helgesverre/namecheap-cli domains list
 ```
 
 ## API Credentials Setup

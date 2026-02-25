@@ -4,7 +4,7 @@
 const message = `
 ┌───────────────────────────────────────────────────────────┐
 │                                                           │
-│   ncli installed successfully!                           │
+│   @helgesverre/namecheap-cli installed successfully!      │
 │                                                           │
 │   Get started:                                            │
 │     namecheap auth login                                  │

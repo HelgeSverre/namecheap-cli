@@ -11,7 +11,7 @@ import { usersCommand } from './commands/users/index.js';
 import { whoisguardCommand } from './commands/whoisguard/index.js';
 
 const packageJson = {
-  name: 'ncli',
+  name: '@helgesverre/namecheap-cli',
   version: '0.1.0',
   description: 'CLI tool for managing Namecheap domains, DNS records, and more',
 };

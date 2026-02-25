@@ -8,7 +8,7 @@ function getPackageInfo(): { name: string; version: string } {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
     return { name: pkg.name, version: pkg.version };
   } catch {
-    return { name: 'ncli', version: '0.1.0' };
+    return { name: '@helgesverre/namecheap-cli', version: '0.1.0' };
   }
 }
 
@@ -22,6 +22,6 @@ export function checkForUpdates(): void {
 
   notifier.notify({
     isGlobal: true,
-    message: 'Update available: {currentVersion} → {latestVersion}\nRun `npm i -g ncli` to update',
+    message: 'Update available: {currentVersion} → {latestVersion}\nRun `npm i -g @helgesverre/namecheap-cli` to update',
   });
 }
