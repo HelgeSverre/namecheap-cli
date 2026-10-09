@@ -448,10 +448,10 @@ describe('handleError', () => {
     errorLogs = [];
 
     // Mock process.exit to capture exit code instead of actually exiting
-    process.exit = ((code?: number) => {
+    process.exit = (code?: number) => {
       exitCode = code;
       throw new Error(`process.exit(${code})`);
-    }) as typeof process.exit;
+    };
 
     // Mock console.error to capture output
     console.error = (...args: unknown[]) => {

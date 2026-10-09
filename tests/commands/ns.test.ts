@@ -60,10 +60,10 @@ beforeEach(() => {
   // Mock process.exit
   originalExit = process.exit;
   exitCode = undefined;
-  process.exit = ((code?: number) => {
+  process.exit = (code?: number) => {
     exitCode = code;
     throw new Error(`process.exit(${code})`);
-  }) as typeof process.exit;
+  };
 
   // Mock getClient
   trackSpy(
@@ -254,7 +254,7 @@ describe('ns reset command', () => {
   test('prompts for confirmation without --force', async () => {
     trackSpy(spyOn(dnsApi, 'setDefaultNameservers').mockResolvedValue(true));
     const confirmSpy = trackSpy(
-      spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(true as boolean),
+      spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(true),
     );
 
     const program = new Command();
@@ -267,7 +267,7 @@ describe('ns reset command', () => {
 
   test('cancels when user declines confirmation', async () => {
     trackSpy(spyOn(dnsApi, 'setDefaultNameservers').mockResolvedValue(true));
-    trackSpy(spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(false as boolean));
+    trackSpy(spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(false));
 
     const program = new Command();
     program.addCommand(resetCommand);

@@ -42,10 +42,10 @@ export function mockProcessExit(): { exitCode: number | undefined; restore: () =
   const originalExit = process.exit;
   let exitCode: number | undefined;
 
-  process.exit = ((code?: number) => {
+  process.exit = (code?: number) => {
     exitCode = code;
     throw new Error(`process.exit(${code})`);
-  }) as typeof process.exit;
+  };
 
   return {
     get exitCode() {

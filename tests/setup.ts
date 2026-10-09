@@ -6,6 +6,7 @@
  * point HOME and NAMECHEAP_CLI_CONFIG_DIR at a throwaway directory before any
  * test module is imported, and abort if the redirect did not take effect.
  */
+import { afterAll } from 'bun:test';
 import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -25,6 +26,6 @@ for (const resolved of [getConfigPath(), getCompletionPath('bash'), getCompletio
   }
 }
 
-process.on('exit', () => {
+afterAll(() => {
   rmSync(sandboxHome, { recursive: true, force: true });
 });

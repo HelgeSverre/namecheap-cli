@@ -20,10 +20,10 @@ describe('completions command', () => {
 
     console.log = (...args) => logs.push(args.map(String).join(' '));
     console.error = (...args) => errors.push(args.map(String).join(' '));
-    process.exit = ((code?: number) => {
+    process.exit = (code?: number) => {
       exitCode = code ?? 0;
       throw new Error(`process.exit(${code})`);
-    }) as never;
+    };
   });
 
   afterEach(() => {
