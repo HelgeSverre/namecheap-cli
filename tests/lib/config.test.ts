@@ -129,6 +129,17 @@ describe('config', () => {
   });
 
   describe('getConfigPath', () => {
+    test('honours NAMECHEAP_CLI_CONFIG_DIR and never resolves to the real home', () => {
+      const original = process.env.NAMECHEAP_CLI_CONFIG_DIR;
+      try {
+        process.env.NAMECHEAP_CLI_CONFIG_DIR = '/tmp/custom-namecheap-dir';
+        expect(getConfigPath()).toBe('/tmp/custom-namecheap-dir/config.json');
+      } finally {
+        process.env.NAMECHEAP_CLI_CONFIG_DIR = original;
+      }
+      expect(getConfigPath()).toContain('namecheap-cli-test-home-');
+    });
+
     test('returns a string path', () => {
       const path = getConfigPath();
       expect(typeof path).toBe('string');
