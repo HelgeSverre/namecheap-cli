@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Node.js 22.12+ required**: `commander` 15 and `chalk` 6 require Node.js 22.12 or newer (Node 18 and 20 are end-of-life); `engines` updated accordingly
+- **Dependencies**: Updated to latest releases
+  - `commander` 14 → 15, `chalk` 5 → 6, `@inquirer/prompts` 8.7, `fast-xml-parser` 5.11, `ora` 9.4, `tldts` 7.4
+  - Dev: `eslint` / `@eslint/js` 9 → 10, `typescript` 5.9 → 6.0, `typescript-eslint` 8.71, `prettier` 3.9, `@types/bun` 1.4; added `@types/update-notifier`
+  - TypeScript stays on 6.0: `typescript-eslint` does not support TypeScript 7 yet
+  - Docs site: `vue` 3.5.43
+
 - **Domain Parsing**: Added `tldts` library for proper public suffix domain parsing
   - Correctly handles multi-part TLDs like `.co.uk`, `.com.au`
   - Automatically strips subdomains (e.g., `www.example.com` → `example.com`)

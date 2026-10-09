@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- **Node.js** 18.0.0 or higher, or the [Bun](https://bun.sh) runtime
+- **Node.js** 22.12.0 or higher, or the [Bun](https://bun.sh) runtime
 
 ## Installation
 
