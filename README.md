@@ -6,7 +6,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@helgesverre/namecheap-cli?style=flat-square&color=FF8C44&label=downloads)](https://www.npmjs.com/package/@helgesverre/namecheap-cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/HelgeSverre/namecheap-cli/ci.yml?style=flat-square&label=CI)](https://github.com/HelgeSverre/namecheap-cli/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-417E38?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Node](https://img.shields.io/badge/node-%3E%3D22.12-417E38?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-6E6F71?style=flat-square)](https://opensource.org/licenses/MIT)
 
 A powerful command-line interface for managing Namecheap domains, DNS records, nameservers, WhoisGuard privacy
@@ -42,7 +42,7 @@ bunx @helgesverre/namecheap-cli domains list
 
 ### Requirements
 
-- Node.js 18.0.0 or higher (or Bun runtime)
+- Node.js 22.12.0 or higher (or Bun runtime)
 
 ## Quick Start
 
