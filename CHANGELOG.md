@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-10
+
 ### Changed
 
 - **Node.js 22.12+ required**: `commander` 15 and `chalk` 6 require Node.js 22.12 or newer (Node 18 and 20 are end-of-life); `engines` updated accordingly
