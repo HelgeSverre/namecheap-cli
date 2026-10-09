@@ -54,10 +54,10 @@ beforeEach(() => {
   // Mock process.exit
   originalExit = process.exit;
   exitCode = undefined;
-  process.exit = ((code?: number) => {
+  process.exit = (code?: number) => {
     exitCode = code;
     throw new Error(`process.exit(${code})`);
-  }) as typeof process.exit;
+  };
 
   // Mock getClient
   trackSpy(

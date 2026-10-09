@@ -57,10 +57,10 @@ beforeEach(() => {
   // Mock process.exit
   originalExit = process.exit;
   exitCode = undefined;
-  process.exit = ((code?: number) => {
+  process.exit = (code?: number) => {
     exitCode = code;
     throw new Error(`process.exit(${code})`);
-  }) as typeof process.exit;
+  };
 
   // Mock getClient
   trackSpy(
@@ -372,7 +372,7 @@ describe('dns rm command', () => {
     );
 
     trackSpy(spyOn(dnsApi, 'deleteDnsRecord').mockResolvedValue(true));
-    trackSpy(spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(true as boolean));
+    trackSpy(spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(true));
 
     const program = new Command();
     program.addCommand(rmCommand);
@@ -390,7 +390,7 @@ describe('dns rm command', () => {
     );
 
     trackSpy(spyOn(dnsApi, 'deleteDnsRecord').mockResolvedValue(true));
-    trackSpy(spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(false as boolean));
+    trackSpy(spyOn(prompts, 'confirmDangerousOperation').mockResolvedValue(false));
 
     const program = new Command();
     program.addCommand(rmCommand);
