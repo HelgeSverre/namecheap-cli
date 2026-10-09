@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
+import { getHomeDir } from '../utils/home.js';
 
 export type Shell = 'bash' | 'zsh' | 'fish';
 
@@ -35,7 +35,7 @@ function getHomebrewPrefix(): string | null {
 }
 
 export function getCompletionPath(shell: Shell, options: { homebrew?: boolean } = {}): string {
-  const home = os.homedir();
+  const home = getHomeDir();
   const brewPrefix = getHomebrewPrefix();
 
   switch (shell) {

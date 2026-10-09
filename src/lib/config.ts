@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { getHomeDir } from '../utils/home.js';
 import type { ApiCredentials } from './api/types.js';
 
 interface ConfigSchema {
@@ -9,8 +9,18 @@ interface ConfigSchema {
   defaultOutput: 'table' | 'json';
 }
 
-const CONFIG_DIR = join(homedir(), '.config', 'namecheap-cli');
-const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
+/**
+ * Directory holding the CLI's config file. `NAMECHEAP_CLI_CONFIG_DIR` overrides
+ * the default `~/.config/namecheap-cli`. Resolved on every call so tests (and
+ * users) can redirect it without re-importing the module.
+ */
+export function getConfigDir(): string {
+  return process.env.NAMECHEAP_CLI_CONFIG_DIR || join(getHomeDir(), '.config', 'namecheap-cli');
+}
+
+function getConfigFile(): string {
+  return join(getConfigDir(), 'config.json');
+}
 
 const DEFAULT_CONFIG: ConfigSchema = {
   sandbox: false,
@@ -18,15 +28,17 @@ const DEFAULT_CONFIG: ConfigSchema = {
 };
 
 function ensureConfigDir(): void {
-  if (!existsSync(CONFIG_DIR)) {
-    mkdirSync(CONFIG_DIR, { recursive: true });
+  const configDir = getConfigDir();
+  if (!existsSync(configDir)) {
+    mkdirSync(configDir, { recursive: true });
   }
 }
 
 function readConfig(): ConfigSchema {
   try {
-    if (existsSync(CONFIG_FILE)) {
-      const content = readFileSync(CONFIG_FILE, 'utf-8');
+    const configFile = getConfigFile();
+    if (existsSync(configFile)) {
+      const content = readFileSync(configFile, 'utf-8');
       const parsed = JSON.parse(content) as Partial<ConfigSchema>;
       return { ...DEFAULT_CONFIG, ...parsed };
     }
@@ -38,7 +50,7 @@ function readConfig(): ConfigSchema {
 
 function writeConfig(config: ConfigSchema): void {
   ensureConfigDir();
-  writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
+  writeFileSync(getConfigFile(), JSON.stringify(config, null, 2), 'utf-8');
 }
 
 export function getCredentials(): ApiCredentials | undefined {
@@ -83,7 +95,7 @@ export function setDefaultOutput(format: 'table' | 'json'): void {
 }
 
 export function getConfigPath(): string {
-  return CONFIG_FILE;
+  return getConfigFile();
 }
 
 export function getAllConfig(): ConfigSchema {

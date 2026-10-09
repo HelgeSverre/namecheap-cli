@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Test Isolation**: The test suite no longer reads or writes the real `~/.config/namecheap-cli/config.json` or real shell completion files; a preload redirects `HOME` and the config directory to a temp sandbox (previously a test run could wipe stored credentials)
+- **Config Location**: `NAMECHEAP_CLI_CONFIG_DIR` overrides the config directory (default `~/.config/namecheap-cli`)
 - **DNS MX Records** ([#4](https://github.com/HelgeSverre/namecheap-cli/issues/4)): `dns add/set/rm` now send `EmailType` to `namecheap.domains.dns.setHosts`
   - `EmailType=MX` is sent whenever the record list contains an MX record, so Namecheap no longer silently drops MX records
   - Otherwise the domain's existing email type (FWD, MXE, OX, GMAIL) is read from `getHosts` and preserved instead of being reset
