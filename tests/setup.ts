@@ -15,12 +15,20 @@ const sandboxHome = realpathSync(mkdtempSync(join(tmpdir(), 'namecheap-cli-test-
 
 process.env.HOME = sandboxHome;
 process.env.USERPROFILE = sandboxHome;
+process.env.XDG_CONFIG_HOME = join(sandboxHome, '.config');
 process.env.NAMECHEAP_CLI_CONFIG_DIR = join(sandboxHome, '.config', 'namecheap-cli');
 
 const { getConfigPath } = await import('../src/lib/config.js');
 const { getCompletionPath } = await import('../src/completions/install.js');
+const { getUpdateCheckCachePath } = await import('../src/lib/uninstall.js');
 
-for (const resolved of [getConfigPath(), getCompletionPath('bash'), getCompletionPath('zsh')]) {
+for (const resolved of [
+  getConfigPath(),
+  getCompletionPath('bash'),
+  getCompletionPath('zsh'),
+  getCompletionPath('fish'),
+  getUpdateCheckCachePath(),
+]) {
   if (!resolved.startsWith(sandboxHome)) {
     throw new Error(`Test sandbox failed: ${resolved} is outside ${sandboxHome}`);
   }

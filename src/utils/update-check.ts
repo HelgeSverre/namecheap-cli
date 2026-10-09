@@ -1,28 +1,14 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import updateNotifier from 'update-notifier';
-
-function getPackageInfo(): { name: string; version: string } {
-  try {
-    const pkgPath = join(process.cwd(), 'package.json');
-    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-    return { name: pkg.name, version: pkg.version };
-  } catch {
-    return { name: '@helgesverre/namecheap-cli', version: '0.1.0' };
-  }
-}
+import { PACKAGE_NAME, PACKAGE_VERSION } from '../lib/package-info.js';
 
 export function checkForUpdates(): void {
-  const pkg = getPackageInfo();
-
   const notifier = updateNotifier({
-    pkg,
+    pkg: { name: PACKAGE_NAME, version: PACKAGE_VERSION },
     updateCheckInterval: 1000 * 60 * 60 * 24, // 1 day
   });
 
   notifier.notify({
     isGlobal: true,
-    message:
-      'Update available: {currentVersion} → {latestVersion}\nRun `npm i -g @helgesverre/namecheap-cli` to update',
+    message: `Update available: {currentVersion} → {latestVersion}\nRun \`npm i -g ${PACKAGE_NAME}\` to update`,
   });
 }

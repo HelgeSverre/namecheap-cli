@@ -162,6 +162,8 @@ namecheap config path              # Show config file path
 - `sandbox` - Use sandbox API (true/false)
 - `output` - Default output format (table/json)
 
+Config is stored in `~/.config/namecheap-cli/config.json`. Set `NAMECHEAP_CLI_CONFIG_DIR` to use a different directory.
+
 ## Sandbox Mode
 
 For testing without affecting production:
@@ -210,6 +212,16 @@ To uninstall completions:
 
 ```bash
 namecheap completions uninstall
+```
+
+### Uninstalling
+
+`namecheap uninstall` removes everything the CLI has written to your machine: the config file with your stored API credentials, installed shell completions, and the update-check cache. It lists the files and asks for confirmation first, then prints the command that removes the package itself (e.g. `npm uninstall -g @helgesverre/namecheap-cli`), matched to how you installed it.
+
+```bash
+namecheap uninstall --dry-run   # Show what would be removed
+namecheap uninstall             # Remove after confirmation
+namecheap uninstall --yes       # Skip confirmation (also: --force)
 ```
 
 ## Output Formats

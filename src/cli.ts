@@ -8,21 +8,19 @@ import { dnsCommand } from './commands/dns/index.js';
 import { domainsCommand } from './commands/domains/index.js';
 import { nsCommand } from './commands/ns/index.js';
 import { usersCommand } from './commands/users/index.js';
+import { uninstallCommand } from './commands/uninstall/index.js';
 import { whoisguardCommand } from './commands/whoisguard/index.js';
+import { PACKAGE_VERSION } from './lib/package-info.js';
 
-const packageJson = {
-  name: '@helgesverre/namecheap-cli',
-  version: '0.1.0',
-  description: 'CLI tool for managing Namecheap domains, DNS records, and more',
-};
+const DESCRIPTION = 'CLI tool for managing Namecheap domains, DNS records, and more';
 
 export function createProgram(): Command {
   const program = new Command();
 
   program
     .name('namecheap')
-    .description(packageJson.description)
-    .version(packageJson.version, '-v, --version', 'Output the version number')
+    .description(DESCRIPTION)
+    .version(PACKAGE_VERSION, '-v, --version', 'Output the version number')
     .helpOption('-h, --help', 'Display help for command');
 
   program.addCommand(addressCommand);
@@ -33,6 +31,7 @@ export function createProgram(): Command {
   program.addCommand(configCommand);
   program.addCommand(usersCommand);
   program.addCommand(whoisguardCommand);
+  program.addCommand(uninstallCommand);
 
   program.addHelpText(
     'after',

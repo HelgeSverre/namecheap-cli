@@ -7,7 +7,10 @@ import { checkForUpdates } from './utils/update-check.js';
 const program = createProgram();
 program.addCommand(completionsCommand);
 
-checkForUpdates();
+// The update check writes a cache file; don't recreate it while uninstalling
+if (process.argv[2] !== 'uninstall') {
+  checkForUpdates();
+}
 
 program.parse(process.argv);
 
