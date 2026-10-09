@@ -64,6 +64,7 @@ export default defineConfig({
           { text: 'WhoisGuard', link: '/commands/whoisguard' },
           { text: 'Address', link: '/commands/address' },
           { text: 'Config', link: '/commands/config' },
+          { text: 'Uninstall', link: '/commands/uninstall' },
         ],
       },
     ],

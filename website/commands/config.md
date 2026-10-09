@@ -136,5 +136,5 @@ $ namecheap config path
 ```
 
 ::: tip
-The config file is stored at `~/.config/namecheap-cli/config.json` on all platforms.
+The config file is stored at `~/.config/namecheap-cli/config.json` on all platforms. Set `NAMECHEAP_CLI_CONFIG_DIR` to use a different directory.
 :::

@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Update Check**: The update notifier now uses the CLI's own package name and version instead of reading `package.json` from the current working directory (which checked for updates to whatever project you ran it in)
+- **Version**: `namecheap --version` is read from `package.json` instead of a hard-coded string
 - **Test Isolation**: The test suite no longer reads or writes the real `~/.config/namecheap-cli/config.json` or real shell completion files; a preload redirects `HOME` and the config directory to a temp sandbox (previously a test run could wipe stored credentials)
 - **Config Location**: `NAMECHEAP_CLI_CONFIG_DIR` overrides the config directory (default `~/.config/namecheap-cli`)
 - **DNS MX Records** ([#4](https://github.com/HelgeSverre/namecheap-cli/issues/4)): `dns add/set/rm` now send `EmailType` to `namecheap.domains.dns.setHosts`
@@ -36,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Uninstall** ([#3](https://github.com/HelgeSverre/namecheap-cli/issues/3)): `namecheap uninstall` removes stored config/credentials, installed shell completions (user and Homebrew locations) and the update-check cache
+  - Lists what will be removed and asks for confirmation; `--force`/`--yes` skips it, `--dry-run` previews, `--json` for scripts
+  - Refuses to delete without confirmation in non-interactive shells
+  - Prints the command to remove the package itself for npm, bun, pnpm, yarn or a standalone binary
 - **Test Coverage**: Added 97 new tests (379 → 476 total)
   - `tests/lib/api/ns.test.ts` - Nameserver API tests
   - `tests/lib/api/whoisguard.test.ts` - WhoisGuard API tests
