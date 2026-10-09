@@ -111,6 +111,17 @@ export function parseDnsHosts(data: unknown): unknown[] {
   return Array.isArray(hosts) ? hosts : [hosts];
 }
 
+export function parseDnsEmailType(data: unknown): string | undefined {
+  const commandResponse = data as {
+    DomainDNSGetHostsResult?: {
+      '@_EmailType'?: unknown;
+    };
+  };
+
+  const emailType = commandResponse?.DomainDNSGetHostsResult?.['@_EmailType'];
+  return typeof emailType === 'string' && emailType !== '' ? emailType : undefined;
+}
+
 export function parseNameservers(data: unknown): unknown {
   const commandResponse = data as {
     DomainDNSGetListResult?: unknown;

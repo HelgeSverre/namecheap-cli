@@ -4,6 +4,8 @@ import { join } from 'path';
 import { NamecheapClient } from '../../../src/lib/api/client.js';
 import {
   getDnsHosts,
+  getDnsHostList,
+  resolveEmailType,
   setDnsHosts,
   addDnsRecord,
   updateDnsRecord,
@@ -330,6 +332,114 @@ const successXml = `<?xml version="1.0" encoding="utf-8"?>
   <ExecutionTime>0.5</ExecutionTime>
 </ApiResponse>`;
 
+function hostsXml(emailType: string | undefined, hosts: string[]): string {
+  const emailTypeAttr = emailType === undefined ? '' : ` EmailType="${emailType}"`;
+  return `<?xml version="1.0" encoding="utf-8"?>
+<ApiResponse Status="OK" xmlns="http://api.namecheap.com/xml.response">
+  <Errors />
+  <Warnings />
+  <CommandResponse Type="namecheap.domains.dns.getHosts">
+    <DomainDNSGetHostsResult Domain="example.com"${emailTypeAttr} IsUsingOurDNS="true">
+      ${hosts.join('\n      ')}
+    </DomainDNSGetHostsResult>
+  </CommandResponse>
+</ApiResponse>`;
+}
+
+const aHost =
+  '<host HostId="1" Name="@" Type="A" Address="192.168.1.1" MXPref="10" TTL="1800" IsActive="true" />';
+const txtHost =
+  '<host HostId="2" Name="@" Type="TXT" Address="v=spf1 ~all" MXPref="10" TTL="1800" IsActive="true" />';
+const mxHost =
+  '<host HostId="3" Name="@" Type="MX" Address="mail.example.com." MXPref="10" TTL="1800" IsActive="true" />';
+
+/** Mock a getHosts GET followed by a setHosts POST; returns a getter for the POST params */
+function mockGetThenSet(getXml: string) {
+  let callCount = 0;
+  const mockFn = mock(() => {
+    callCount++;
+    const xml = callCount === 1 ? getXml : successXml;
+    return Promise.resolve(new Response(xml, { status: 200 }));
+  });
+  global.fetch = mockFn as unknown as typeof fetch;
+
+  return () => {
+    const calls = mockFn.mock.calls as unknown as [string, RequestInit][];
+    expect(calls.length).toBe(2);
+    return new URLSearchParams(calls[1]?.[1]?.body as string);
+  };
+}
+
+describe('getDnsHostList', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('returns records and email type', async () => {
+    mockFetch(hostsXml('FWD', [aHost, txtHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    const result = await getDnsHostList(client, 'example.com');
+
+    expect(result.records.length).toBe(2);
+    expect(result.emailType).toBe('FWD');
+  });
+
+  test('email type is undefined when not reported', async () => {
+    mockFetch(loadFixture('dns-hosts.xml'));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    const result = await getDnsHostList(client, 'example.com');
+
+    expect(result.records.length).toBe(4);
+    expect(result.emailType).toBeUndefined();
+  });
+
+  test('ignores unknown email type values', async () => {
+    mockFetch(hostsXml('NONE', [aHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    const result = await getDnsHostList(client, 'example.com');
+
+    expect(result.emailType).toBeUndefined();
+  });
+});
+
+describe('resolveEmailType', () => {
+  test('uses MX when any MX record is present', () => {
+    expect(
+      resolveEmailType(
+        [
+          { name: '@', type: 'A', address: '1.2.3.4' },
+          { name: '@', type: 'MX', address: 'mail.example.com.', mxPref: 10 },
+        ],
+        'FWD',
+      ),
+    ).toBe('MX');
+  });
+
+  test('preserves non-MX email types when there are no MX records', () => {
+    const records = [{ name: '@', type: 'A' as const, address: '1.2.3.4' }];
+    expect(resolveEmailType(records, 'FWD')).toBe('FWD');
+    expect(resolveEmailType(records, 'MXE')).toBe('MXE');
+    expect(resolveEmailType(records, 'OX')).toBe('OX');
+  });
+
+  test('drops MX when no MX records remain', () => {
+    expect(resolveEmailType([{ name: '@', type: 'A', address: '1.2.3.4' }], 'MX')).toBeUndefined();
+  });
+
+  test('returns undefined with no MX records and no current type', () => {
+    expect(resolveEmailType([{ name: '@', type: 'A', address: '1.2.3.4' }])).toBeUndefined();
+  });
+});
+
 describe('setDnsHosts', () => {
   let originalFetch: typeof fetch;
 
@@ -383,6 +493,146 @@ describe('setDnsHosts', () => {
     const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
     const body = calls[0]?.[1]?.body as string;
     expect(body).toContain('MXPref1=10');
+  });
+
+  test('sends EmailType=MX when MX records are present', async () => {
+    const fetchMock = mockFetch(successXml);
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await setDnsHosts(client, 'example.com', [
+      { name: '@', type: 'MX', address: 'mail.example.com.', mxPref: 10, ttl: 1800 },
+    ]);
+
+    const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    const params = new URLSearchParams(calls[0]?.[1]?.body as string);
+    expect(params.get('EmailType')).toBe('MX');
+  });
+
+  test('sends the given email type when there are no MX records', async () => {
+    const fetchMock = mockFetch(successXml);
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await setDnsHosts(
+      client,
+      'example.com',
+      [{ name: '@', type: 'A', address: '1.2.3.4', ttl: 1800 }],
+      'FWD',
+    );
+
+    const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    const params = new URLSearchParams(calls[0]?.[1]?.body as string);
+    expect(params.get('EmailType')).toBe('FWD');
+  });
+
+  test('omits EmailType when there is nothing to send', async () => {
+    const fetchMock = mockFetch(successXml);
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await setDnsHosts(client, 'example.com', [
+      { name: '@', type: 'A', address: '1.2.3.4', ttl: 1800 },
+    ]);
+
+    const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    const params = new URLSearchParams(calls[0]?.[1]?.body as string);
+    expect(params.has('EmailType')).toBe(false);
+  });
+});
+
+describe('EmailType preservation on record changes', () => {
+  let originalFetch: typeof fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  test('adding an MX record sends EmailType=MX', async () => {
+    const getPostParams = mockGetThenSet(hostsXml('FWD', [aHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await addDnsRecord(client, 'example.com', {
+      name: '@',
+      type: 'MX',
+      address: 'mail.example.com.',
+      mxPref: 10,
+      ttl: 1800,
+    });
+
+    const params = getPostParams();
+    expect(params.get('EmailType')).toBe('MX');
+    expect(params.get('RecordType2')).toBe('MX');
+    expect(params.get('MXPref2')).toBe('10');
+  });
+
+  test('adding a non-MX record on an MX domain keeps EmailType=MX', async () => {
+    const getPostParams = mockGetThenSet(hostsXml('MX', [aHost, mxHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await addDnsRecord(client, 'example.com', {
+      name: 'www',
+      type: 'A',
+      address: '5.6.7.8',
+      ttl: 1800,
+    });
+
+    expect(getPostParams().get('EmailType')).toBe('MX');
+  });
+
+  test('adding a record with an explicit email type overrides the current one', async () => {
+    const getPostParams = mockGetThenSet(hostsXml('FWD', [aHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await addDnsRecord(
+      client,
+      'example.com',
+      { name: 'www', type: 'A', address: '5.6.7.8', ttl: 1800 },
+      { emailType: 'OX' },
+    );
+
+    expect(getPostParams().get('EmailType')).toBe('OX');
+  });
+
+  test('editing a non-MX record on a FWD domain keeps EmailType=FWD', async () => {
+    const getPostParams = mockGetThenSet(hostsXml('FWD', [aHost, txtHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await updateDnsRecord(client, 'example.com', '1', { address: '10.20.30.40' });
+
+    const params = getPostParams();
+    expect(params.get('EmailType')).toBe('FWD');
+    expect(params.get('Address1')).toBe('10.20.30.40');
+  });
+
+  test('editing a record on an MXE domain keeps EmailType=MXE', async () => {
+    const getPostParams = mockGetThenSet(hostsXml('MXE', [aHost, txtHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await updateDnsRecord(client, 'example.com', '2', { address: 'v=spf1 -all' });
+
+    expect(getPostParams().get('EmailType')).toBe('MXE');
+  });
+
+  test('removing the last MX record does not send EmailType=MX', async () => {
+    const getPostParams = mockGetThenSet(hostsXml('MX', [aHost, mxHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await deleteDnsRecord(client, 'example.com', '3');
+
+    const params = getPostParams();
+    expect(params.get('EmailType')).not.toBe('MX');
+    expect(params.has('RecordType2')).toBe(false);
+  });
+
+  test('removing a non-MX record on an MX domain keeps EmailType=MX', async () => {
+    const getPostParams = mockGetThenSet(hostsXml('MX', [aHost, mxHost]));
+    const client = new NamecheapClient(mockCredentials, true);
+
+    await deleteDnsRecord(client, 'example.com', '1');
+
+    expect(getPostParams().get('EmailType')).toBe('MX');
   });
 });
 

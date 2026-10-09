@@ -83,6 +83,20 @@ export type DnsRecordType =
   | 'URL301'
   | 'FRAME';
 
+/**
+ * Namecheap email settings for a domain, sent as `EmailType` to
+ * `namecheap.domains.dns.setHosts`. MX host records are only kept when this is `MX`.
+ */
+export type DnsEmailType = 'MX' | 'MXE' | 'FWD' | 'OX' | 'GMAIL';
+
+export const DNS_EMAIL_TYPES: readonly DnsEmailType[] = ['MX', 'MXE', 'FWD', 'OX', 'GMAIL'];
+
+export interface DnsHostList {
+  records: DnsRecord[];
+  /** Email type reported by getHosts, if it is one setHosts accepts */
+  emailType?: DnsEmailType;
+}
+
 export interface DnsRecord {
   hostId: string;
   name: string;
