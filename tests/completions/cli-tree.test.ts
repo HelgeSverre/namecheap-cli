@@ -3,7 +3,7 @@ import { createProgram } from '../../src/cli';
 import { commandToNode, type CmdNode } from '../../src/completions/model';
 
 describe('CLI command tree', () => {
-  const program = createProgram({ includeCompletions: false });
+  const program = createProgram();
   const tree = commandToNode(program);
 
   function getCommand(name: string): CmdNode | undefined {

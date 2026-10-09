@@ -1,6 +1,14 @@
 import { NamecheapClient } from './client.js';
-import { parseDnsHosts, parseNameservers } from './parser.js';
-import type { DnsRecord, DnsRecordInput, DnsRecordType, NameserverInfo } from './types.js';
+import { parseDnsEmailType, parseDnsHosts, parseNameservers } from './parser.js';
+import { DNS_EMAIL_TYPES } from './types.js';
+import type {
+  DnsEmailType,
+  DnsHostList,
+  DnsRecord,
+  DnsRecordInput,
+  DnsRecordType,
+  NameserverInfo,
+} from './types.js';
 import { parseDomain } from '../../utils/domain.js';
 
 interface RawDnsHost {
@@ -20,7 +28,31 @@ interface RawNameserverInfo {
   Nameserver?: string | string[];
 }
 
-export async function getDnsHosts(client: NamecheapClient, domain: string): Promise<DnsRecord[]> {
+export function normalizeEmailType(value: string | undefined): DnsEmailType | undefined {
+  if (!value) return undefined;
+  const upper = value.toUpperCase() as DnsEmailType;
+  return DNS_EMAIL_TYPES.includes(upper) ? upper : undefined;
+}
+
+/**
+ * Decide which EmailType to send with setHosts.
+ * Namecheap discards MX host records unless EmailType=MX, so any MX record forces MX.
+ * Otherwise keep the domain's current setting (FWD, MXE, OX, ...) so it isn't reset,
+ * except that a stale MX setting is dropped once no MX records remain.
+ */
+export function resolveEmailType(
+  records: DnsRecordInput[],
+  currentEmailType?: DnsEmailType,
+): DnsEmailType | undefined {
+  if (records.some((r) => r.type === 'MX')) return 'MX';
+  if (currentEmailType === 'MX') return undefined;
+  return currentEmailType;
+}
+
+export async function getDnsHostList(
+  client: NamecheapClient,
+  domain: string,
+): Promise<DnsHostList> {
   const { sld, tld } = parseDomain(domain);
 
   const response = await client.request('namecheap.domains.dns.getHosts', {
@@ -31,7 +63,7 @@ export async function getDnsHosts(client: NamecheapClient, domain: string): Prom
   const data = NamecheapClient.handleResponse(response);
   const rawHosts = parseDnsHosts(data) as RawDnsHost[];
 
-  return rawHosts.map((h) => ({
+  const records = rawHosts.map((h) => ({
     hostId: String(h['@_HostId']),
     name: h['@_Name'],
     type: h['@_Type'],
@@ -41,12 +73,20 @@ export async function getDnsHosts(client: NamecheapClient, domain: string): Prom
     isActive: h['@_IsActive'],
     isDDNSEnabled: h['@_IsDDNSEnabled'],
   }));
+
+  return { records, emailType: normalizeEmailType(parseDnsEmailType(data)) };
+}
+
+export async function getDnsHosts(client: NamecheapClient, domain: string): Promise<DnsRecord[]> {
+  const { records } = await getDnsHostList(client, domain);
+  return records;
 }
 
 export async function setDnsHosts(
   client: NamecheapClient,
   domain: string,
   records: DnsRecordInput[],
+  emailType?: DnsEmailType,
 ): Promise<boolean> {
   const { sld, tld } = parseDomain(domain);
 
@@ -54,6 +94,12 @@ export async function setDnsHosts(
     SLD: sld,
     TLD: tld,
   };
+
+  // Without EmailType=MX Namecheap silently drops MX host records
+  const resolvedEmailType = resolveEmailType(records, emailType);
+  if (resolvedEmailType) {
+    params.EmailType = resolvedEmailType;
+  }
 
   // Add each record as numbered parameters
   records.forEach((record, index) => {
@@ -76,9 +122,10 @@ export async function addDnsRecord(
   client: NamecheapClient,
   domain: string,
   record: DnsRecordInput,
+  options: { emailType?: DnsEmailType } = {},
 ): Promise<boolean> {
   // Get existing records first
-  const existingRecords = await getDnsHosts(client, domain);
+  const { records: existingRecords, emailType } = await getDnsHostList(client, domain);
 
   // Convert existing records to input format
   const allRecords: DnsRecordInput[] = existingRecords.map((r) => ({
@@ -92,8 +139,8 @@ export async function addDnsRecord(
   // Add the new record
   allRecords.push(record);
 
-  // Set all records
-  return setDnsHosts(client, domain, allRecords);
+  // Set all records, preserving the domain's email type unless overridden
+  return setDnsHosts(client, domain, allRecords, options.emailType ?? emailType);
 }
 
 export async function updateDnsRecord(
@@ -103,7 +150,7 @@ export async function updateDnsRecord(
   updates: Partial<DnsRecordInput>,
 ): Promise<boolean> {
   // Get existing records
-  const existingRecords = await getDnsHosts(client, domain);
+  const { records: existingRecords, emailType } = await getDnsHostList(client, domain);
 
   // Find and update the target record
   const allRecords: DnsRecordInput[] = existingRecords.map((r) => {
@@ -125,7 +172,7 @@ export async function updateDnsRecord(
     };
   });
 
-  return setDnsHosts(client, domain, allRecords);
+  return setDnsHosts(client, domain, allRecords, emailType);
 }
 
 export async function deleteDnsRecord(
@@ -134,7 +181,7 @@ export async function deleteDnsRecord(
   hostId: string,
 ): Promise<boolean> {
   // Get existing records
-  const existingRecords = await getDnsHosts(client, domain);
+  const { records: existingRecords, emailType } = await getDnsHostList(client, domain);
 
   // Filter out the record to delete
   const remainingRecords: DnsRecordInput[] = existingRecords
@@ -151,7 +198,7 @@ export async function deleteDnsRecord(
     throw new Error(`Record with ID ${hostId} not found`);
   }
 
-  return setDnsHosts(client, domain, remainingRecords);
+  return setDnsHosts(client, domain, remainingRecords, emailType);
 }
 
 export async function getNameservers(

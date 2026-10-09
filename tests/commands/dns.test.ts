@@ -206,8 +206,66 @@ describe('dns add command', () => {
         address: '1.2.3.4',
         ttl: 3600,
       }),
+      { emailType: undefined },
     );
     expect(logs.some((l) => l.includes('Added A record'))).toBe(true);
+  });
+
+  test('passes --email-type through to the API', async () => {
+    const addDnsRecordSpy = trackSpy(spyOn(dnsApi, 'addDnsRecord').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(addCommand);
+    await program.parseAsync([
+      'node',
+      'test',
+      'add',
+      'example.com',
+      '--type',
+      'TXT',
+      '--name',
+      '@',
+      '--value',
+      'hello',
+      '--email-type',
+      'fwd',
+    ]);
+
+    expect(addDnsRecordSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      'example.com',
+      expect.objectContaining({ type: 'TXT' }),
+      { emailType: 'FWD' },
+    );
+  });
+
+  test('rejects an invalid --email-type', async () => {
+    const addDnsRecordSpy = trackSpy(spyOn(dnsApi, 'addDnsRecord').mockResolvedValue(true));
+
+    const program = new Command();
+    program.addCommand(addCommand);
+
+    try {
+      await program.parseAsync([
+        'node',
+        'test',
+        'add',
+        'example.com',
+        '--type',
+        'A',
+        '--name',
+        '@',
+        '--value',
+        '1.2.3.4',
+        '--email-type',
+        'BOGUS',
+      ]);
+    } catch (_e) {
+      // Expected
+    }
+
+    expect(exitCode).toBe(1);
+    expect(addDnsRecordSpy).not.toHaveBeenCalled();
   });
 
   test('adds MX record with priority', async () => {
@@ -237,6 +295,7 @@ describe('dns add command', () => {
         type: 'MX',
         mxPref: 10,
       }),
+      { emailType: undefined },
     );
   });
 

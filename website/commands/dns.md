@@ -64,8 +64,11 @@ namecheap dns add <domain> [options]
 | `--value <value>` | Record value/address |
 | `--ttl <seconds>` | TTL in seconds (default: `1800`) |
 | `--mx-pref <priority>` | MX priority (for MX records only) |
+| `--email-type <type>` | Domain email type (`MX`, `MXE`, `FWD`, `OX`, `GMAIL`). Defaults to the current setting |
 
 If `--type`, `--name`, and `--value` are all provided, the record is created directly. Otherwise, an interactive prompt guides you through the process.
+
+Namecheap only keeps MX records when the domain's email type is `MX`, so `dns add`, `dns set` and `dns rm` send `EmailType=MX` whenever the domain has MX records, and otherwise keep the existing email type.
 
 **Example (non-interactive):**
 

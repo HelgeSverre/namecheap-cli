@@ -1,9 +1,15 @@
 import { Command } from 'commander';
 import { getClient } from '../../lib/api/client.js';
-import { addDnsRecord } from '../../lib/api/dns.js';
-import type { DnsRecordType } from '../../lib/api/types.js';
+import { addDnsRecord, normalizeEmailType } from '../../lib/api/dns.js';
+import { DNS_EMAIL_TYPES } from '../../lib/api/types.js';
+import type { DnsEmailType, DnsRecordType } from '../../lib/api/types.js';
 import { success } from '../../lib/output.js';
-import { handleError, validateDomain, validateRecordType } from '../../utils/errors.js';
+import {
+  handleError,
+  validateDomain,
+  validateRecordType,
+  ValidationError,
+} from '../../utils/errors.js';
 import { promptDnsRecord } from '../../utils/prompts.js';
 import { isTTY, withSpinner } from '../../utils/spinner.js';
 
@@ -15,9 +21,24 @@ export const addCommand = new Command('add')
   .option('--value <value>', 'Record value/address')
   .option('--ttl <seconds>', 'TTL in seconds', '1800')
   .option('--mx-pref <priority>', 'MX priority (for MX records)')
+  .option(
+    '--email-type <type>',
+    `Email type to set (${DNS_EMAIL_TYPES.join(', ')}); defaults to the current setting, or MX when MX records exist`,
+  )
   .action(async (domain: string, options) => {
     try {
       validateDomain(domain);
+
+      let emailType: DnsEmailType | undefined;
+      if (options.emailType) {
+        emailType = normalizeEmailType(options.emailType);
+        if (!emailType) {
+          throw new ValidationError(
+            `Invalid email type: ${options.emailType}`,
+            `Valid email types: ${DNS_EMAIL_TYPES.join(', ')}`,
+          );
+        }
+      }
 
       let recordInput: {
         name: string;
@@ -55,7 +76,7 @@ export const addCommand = new Command('add')
       const client = getClient();
 
       await withSpinner(`Adding ${recordInput.type} record to ${domain}...`, async () => {
-        return addDnsRecord(client, domain, recordInput);
+        return addDnsRecord(client, domain, recordInput, { emailType });
       });
 
       success(`Added ${recordInput.type} record: ${recordInput.name} -> ${recordInput.address}`);

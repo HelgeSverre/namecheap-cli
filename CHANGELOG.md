@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **DNS MX Records** ([#4](https://github.com/HelgeSverre/namecheap-cli/issues/4)): `dns add/set/rm` now send `EmailType` to `namecheap.domains.dns.setHosts`
+  - `EmailType=MX` is sent whenever the record list contains an MX record, so Namecheap no longer silently drops MX records
+  - Otherwise the domain's existing email type (FWD, MXE, OX, GMAIL) is read from `getHosts` and preserved instead of being reset
+  - New `--email-type` option on `dns add` to set it explicitly
 - **IP Validation**: Now properly rejects invalid IPs like `999.999.999.999` and accepts IPv6 shorthand like `::1`
 - **Date Formatting**: `formatDate()` properly handles invalid date strings
 

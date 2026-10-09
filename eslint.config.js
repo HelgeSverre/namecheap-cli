@@ -5,7 +5,7 @@ import prettier from 'eslint-config-prettier';
 export default tseslint.config(
   // Ignore patterns
   {
-    ignores: ['dist/**', 'node_modules/**', 'eslint.config.js'],
+    ignores: ['dist/**', 'node_modules/**', 'eslint.config.js', 'website/**'],
   },
 
   // Base ESLint recommended rules
@@ -19,9 +19,19 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['scripts/*.js'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+
+  // Plain Node scripts (e.g. postinstall)
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly' },
     },
   },
 

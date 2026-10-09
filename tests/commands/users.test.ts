@@ -74,6 +74,8 @@ afterEach(() => {
   console.log = originalLog;
   console.error = originalError;
   process.exit = originalExit;
+  // Commands may set process.exitCode (e.g. failed login); don't leak it into the test runner's exit status
+  process.exitCode = 0;
 
   // Restore all spies
   spies.forEach((spy) => {
@@ -514,6 +516,7 @@ describe('users add-funds command', () => {
         apiUser: 'testuser',
         apiKey: 'testkey',
         userName: 'testuser',
+        clientIp: '127.0.0.1',
       }),
     );
     const createAddFundsSpy = trackSpy(
@@ -554,6 +557,7 @@ describe('users add-funds command', () => {
         apiUser: 'testuser',
         apiKey: 'testkey',
         userName: 'testuser',
+        clientIp: '127.0.0.1',
       }),
     );
     trackSpy(
@@ -622,6 +626,7 @@ describe('users add-funds command', () => {
         apiUser: 'testuser',
         apiKey: 'testkey',
         userName: 'testuser',
+        clientIp: '127.0.0.1',
       }),
     );
 
@@ -1026,6 +1031,7 @@ describe('users login command', () => {
     await program.parseAsync(['node', 'test', 'login', 'wronguser', '--password', 'BadPassword']);
 
     expect(errors.some((l) => l.includes('Login failed'))).toBe(true);
+    expect(process.exitCode).toBe(1);
   });
 
   test('outputs JSON with --json flag for success', async () => {
