@@ -27,7 +27,8 @@ function readConfig(): ConfigSchema {
   try {
     if (existsSync(CONFIG_FILE)) {
       const content = readFileSync(CONFIG_FILE, 'utf-8');
-      return { ...DEFAULT_CONFIG, ...JSON.parse(content) };
+      const parsed = JSON.parse(content) as Partial<ConfigSchema>;
+      return { ...DEFAULT_CONFIG, ...parsed };
     }
   } catch {
     // Ignore parse errors, return defaults

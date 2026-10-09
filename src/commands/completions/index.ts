@@ -12,7 +12,7 @@ import { commandToNode } from '../../completions/model.js';
 import { renderBash, renderFish, renderZsh } from '../../completions/renderers.js';
 
 function generateCompletion(shell: Shell): string {
-  const program = createProgram({ includeCompletions: false });
+  const program = createProgram();
   const tree = commandToNode(program);
 
   switch (shell) {

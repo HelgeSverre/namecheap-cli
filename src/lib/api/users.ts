@@ -73,8 +73,7 @@ export async function getPricing(
 }
 
 export type ChangePasswordOptions =
-  | { oldPassword: string; newPassword: string }
-  | { resetCode: string; newPassword: string };
+  { oldPassword: string; newPassword: string } | { resetCode: string; newPassword: string };
 
 export interface ChangePasswordResult {
   success: boolean;
