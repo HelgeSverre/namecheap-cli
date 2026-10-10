@@ -4,10 +4,16 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to publish to npm (e.g. v0.2.0). Skips building the GitHub Release.'
+        required: true
 
 jobs:
   build-binaries:
     name: Build Binaries
+    if: github.event_name == 'push'
     strategy:
       matrix:
         include:
@@ -52,6 +58,7 @@ jobs:
 
   release:
     name: Create Release
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: build-binaries
 
@@ -127,34 +134,50 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Uncomment to enable npm publishing
-  # publish:
-  #   name: Publish to npm
-  #   runs-on: ubuntu-latest
-  #   needs: release
-  #
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Setup Bun
-  #       uses: oven-sh/setup-bun@v2
-  #       with:
-  #         bun-version: latest
-  #
-  #     - name: Install dependencies
-  #       run: bun install
-  #
-  #     - name: Build
-  #       run: bun run build
-  #
-  #     - name: Setup Node.js for npm publish
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '20'
-  #         registry-url: 'https://registry.npmjs.org'
-  #
-  #     - name: Publish to npm
-  #       run: npm publish
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publish:
+    name: Publish to npm
+    # Trusted publishing (OIDC): no npm token. Configured on npmjs.com for this repo + release.yml.
+    if: always() && (needs.release.result == 'success' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    needs: release
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing needs npm >= 11.5.1.
+      - name: Update npm
+        run: npm install -g npm@latest && npm --version
+
+      - name: Skip if this version is already on npm
+        id: check
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "@helgesverre/namecheap-cli@$version" version >/dev/null 2>&1; then
+            echo "Version $version is already published, skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.check.outputs.skip != 'true'
+        run: npm publish --access public
