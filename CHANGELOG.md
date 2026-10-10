@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-10
+
+### Changed
+
+- **npm releases**: Published from GitHub Actions with npm trusted publishing (OIDC) and provenance; no npm token involved. 0.2.0 was only released on GitHub.
+- `repository.url` casing now matches `HelgeSverre/namecheap-cli`
+
 ## [0.2.0] - 2026-10-10
 
 ### Changed
